@@ -660,8 +660,7 @@ ProcessGetFromFile (int fd, unsigned char *buf, uint32 *addr, int max)
 
 
 unsigned int GetCurrentPid(){
-	unsigned int result = currentPCB - pcbs;
-	return result;
+	
 }
 //----------------------------------------------------------------------
 //

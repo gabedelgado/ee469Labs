@@ -1,0 +1,155 @@
+ line   address	contents
+    1                      ; Linked by DLX-LD.
+    2                      ; MemSize 20480
+    3                      ; Data size: 40
+    4                      ; Text size: 220
+    5                      ; Stack size: 8192
+    6  00000000          	.text 0x1000
+    7  00001000          	.data 0x2000
+    8                      ; Compiled by GCC
+   10  00002000          	.align 2
+   11  00002000          	LC0_LF0:
+   12  00002000  48656c6c	.ascii "Hello World!\n\000"
+   12  00002004  6f20576f	
+   12  00002008  726c6421	
+   12  0000200c  0a00    	
+   13  0000200e          	.align 2
+   14  00002010          	LC1_LF0:
+   15  00002010  63757272	.ascii "current pid is %d\000"
+   15  00002014  656e7420	
+   15  00002018  70696420	
+   15  0000201c  69732025	
+   15  00002020  6400    	
+   16  00002022          	.text
+   17  00001000          	.align 2
+   18  00001000          	.proc _main
+   19  00001000          	.global _main
+   20  00001000          	_main:
+   21                      ;  Function 'main'; 0 bytes of locals, 0 regs to save.
+   22  00001000  afbefffc	sw	-4(r29),r30; push fp
+   23  00001004  001df020	add	r30,r0,r29; fp = sp
+   24  00001008  afbffff8	sw	-8(r29),r31; push ret addr
+   25  0000100c  2fbd0008	subui	r29,r29,#8; alloc local storage
+   26  00001010  0c0000c0	jal	___main
+   27  00001014  54000000	nop; not filled.
+   28  00001018  23bdfff8	addi	r29,r29,#-8
+   29  0000101c  3c030000	lhi	r3,((LC0_LF0)>>16)&0xffff
+   30  00001020  24632000	addui	r3,r3,(LC0_LF0)&0xffff
+   31  00001024  afa30000	sw	(r29),r3
+   32  00001028  0c000084	jal	_Printf
+   33  0000102c  54000000	nop; not filled.
+   34  00001030  0c000088	jal	_Getpid
+   35  00001034  54000000	nop; not filled.
+   36  00001038  3c020000	lhi	r2,((_result)>>16)&0xffff
+   37  0000103c  24422024	addui	r2,r2,(_result)&0xffff
+   38  00001040  ac410000	sw	(r2),r1
+   39  00001044  3c030000	lhi	r3,((LC1_LF0)>>16)&0xffff
+   40  00001048  24632010	addui	r3,r3,(LC1_LF0)&0xffff
+   41  0000104c  afa30000	sw	(r29),r3
+   42  00001050  8c410000	lw	r1,(r2)
+   43  00001054  afa10004	sw	4(r29),r1
+   44  00001058  0c000054	jal	_Printf
+   45  0000105c  54000000	nop; not filled.
+   46  00001060  23bd0008	addi	r29,r29,#8
+   47  00001064          	L7_LF0:
+   48  00001064  0bfffffc	j	L7_LF0
+   49  00001068  54000000	nop; not filled.
+   50  0000106c  0c000058	jal	_exit
+   51  00001070  54000000	nop
+   52  00001074          	.endproc _main
+   53  00001074          	.data
+   54  00002022          	.align 2
+   55  00002024          	.global _result
+   56  00002024          	_result:
+   57  00002024          	.space 4
+   58                      ;;;
+   59                      ;;; Stub functions for DLX traps.
+   60                      ;;;
+   61                      ;;; Ethan L. Miller, 1999.  Released to the public domain.
+   62                      ;;;
+   63                      ;;; The traps such as Open and Close
+   64                      ;;; (note the capital letters) are for use by user programs.  The traps
+   65                      ;;; with names such as open and close (lower case) are for use by the OS.
+   66                      ;;;
+   68  00002028          	.text
+   69  00001074          	.align 2
+   71                      ;;; The following are the traps to be used by user-level programs
+   72                      ;;;
+   74  00001074          	.align 2
+   75  00001074          	.proc _Open
+   76  00001074          	.global _Open
+   77  00001074          	_Open:
+   78                      ;;; Note that trap #0x213 actually causes a trap vector in the OS of
+   79                      ;;; 0x1213.  The same is true for other user traps.  Thus, a user trap
+   80                      ;;; with trap #0x240 will result in a trap vector of 0x1240 in the OS.
+   81  00001074  44000213	trap	#0x213
+   82  00001078  4be00000	jr	r31
+   83  0000107c  54000000	nop
+   84  00001080          	.endproc _Open
+   86  00001080          	.proc _Close
+   87  00001080          	.global _Close
+   88  00001080          	_Close:
+   89  00001080  44000214	trap	#0x214
+   90  00001084  4be00000	jr	r31
+   91  00001088  54000000	nop
+   92  0000108c          	.endproc _Close
+   94  0000108c          	.proc _Read
+   95  0000108c          	.global _Read
+   96  0000108c          	_Read:
+   97  0000108c  44000210	trap	#0x210
+   98  00001090  4be00000	jr	r31
+   99  00001094  54000000	nop
+  100  00001098          	.endproc _Read
+  102  00001098          	.proc _Write
+  103  00001098          	.global _Write
+  104  00001098          	_Write:
+  105  00001098  44000211	trap	#0x211
+  106  0000109c  4be00000	jr	r31
+  107  000010a0  54000000	nop
+  108  000010a4          	.endproc _Write
+  110  000010a4          	.proc _Lseek
+  111  000010a4          	.global _Lseek
+  112  000010a4          	_Lseek:
+  113  000010a4  44000212	trap	#0x212
+  114  000010a8  4be00000	jr	r31
+  115  000010ac  54000000	nop
+  116  000010b0          	.endproc _Lseek
+  118  000010b0          	.proc _Printf
+  119  000010b0          	.global _Printf
+  120  000010b0          	_Printf:
+  121  000010b0  44000201	trap	#0x201
+  122  000010b4  4be00000	jr	r31
+  123  000010b8  54000000	nop
+  124  000010bc          	.endproc _Printf
+  126  000010bc          	.proc _Getpid
+  127  000010bc          	.global _Getpid
+  128  000010bc          	_Getpid:
+  129  000010bc  44000440	trap	#0x440
+  130  000010c0  4be00000	jr	r31
+  131  000010c4  54000000	nop
+  132  000010c8          	.endproc _Getpid
+  133                      ;;; Ethan L. Miller, 1999.  Released to the public domain
+  134                      ;;;
+  135                      ;;; Most of the traps are called in files from libtraps.
+  138  000010c8          	.align 2
+  139  000010c8          	.proc _exit
+  140  000010c8          	.global _exit
+  141  000010c8          	_exit:
+  142  000010c8  44000300	trap	#0x300
+  143  000010cc  4be00000	jr	r31
+  144  000010d0  54000000	nop
+  145  000010d4          	.endproc _exit
+  147                      ; for the benefit of gcc.
+  148  000010d4          	.proc ___main
+  149  000010d4          	.global ___main
+  150  000010d4          	___main:
+  151  000010d4  4be00000	jr	r31
+  152  000010d8  54000000	nop
+  153  000010dc          	.endproc ___main
+  154  000010dc          	.text
+  155  000010dc          	.global _etext
+  156  000010dc          	_etext:
+  157  000010dc          	.align 3
+  158  000010e0          	.data
+  159  00002028          	.global _edata
+  160  00002028          	_edata:

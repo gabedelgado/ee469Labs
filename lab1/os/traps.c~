@@ -131,6 +131,7 @@ dointerrupt (unsigned int cause, unsigned int iar, unsigned int isr,
   int	i;
   uint32	args[4];
   int	intrs;
+  int theresult;
 
   dbprintf ('t',"Interrupt cause=0x%x iar=0x%x isr=0x%x args=0x%08x.\n",
 	    cause, iar, isr, (int)trapArgs);

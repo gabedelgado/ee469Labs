@@ -66,6 +66,5 @@ extern void ProcessWakeup (PCB *);
 extern void ProcessSetResult (PCB *, uint32);
 extern void ProcessSleep ();
 extern void ProcessDestroy();
-extern unsigned int GetCurrentPid();
 
 #endif	/* _process_h_ */

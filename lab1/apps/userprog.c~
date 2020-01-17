@@ -1,6 +1,6 @@
 #include "usertraps.h"
 
-unsigned int result;
+int result;
 void main (int x)
 {
   Printf("Hello World!\n"); 
