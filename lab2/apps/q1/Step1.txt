@@ -1,0 +1,28 @@
+
+
+How many sophomores are available in DLXOS? 32
+
+
+How many locks are available in DLXOS? 64
+
+
+How is a semaphore created in DLXOS? 
+
+
+For the DLSOX, there is an array of initialized semaphores that is available for the user, the user must then call SynchModuleInit in order to initialize the semaphores, that is, to set all semaphores inuse quality to 0 to indicate that all semaphores are available and currently unused. Then, the user will call the SemCreate function with a specific count integer associated with the semaphore that will be used. SemCreate will then locate the first unused semaphore in the semaphore array, and initialize said semaphore with the given count and return the handle associated with the semaphore so that the user can access the semaphore.
+
+
+Explain how sem_signal and sem_wait work.
+
+
+Sem_wait protocol first checks the value of the count associated with the semaphore passed in. If the count isn\u2019t positive, then DLSOX checks for 2 things: it first checks if there is space to be allocated in the semaphore queue, and afterwards it checks if a new link can be inserted in the semaphore waiting queue. By passing both checks, the specific process associated with the semaphore is then put to sleep. In the case that the count is positive, the process may continue since there are no processes ongoing simultaneously associated with this particular semaphore. By routine, the count is then decremented.
+
+
+Sem_signal first increments the count associated with the passed semaphore. Then, if the count value is positive (meaning, checking if there is a process to wake up) it checks if there is a process waiting to be woken up. After that, the process associated with the sophomore is then woken up in order to continue its execution.
+
+
+What is a handle and how is it used to access semaphores in DLXOS?
+
+
+A handle is the ID associated with each semaphore available in the DLXOS. As mentioned previously, there is an array of semaphores with a max size of 32 semaphores, each of them with a handle ID or index number associated with their location in said array. In order to access a specific semaphore, its index number for the array must be known in order to locate it.
+
