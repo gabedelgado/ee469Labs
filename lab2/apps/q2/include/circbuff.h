@@ -8,6 +8,7 @@ typedef struct circbuff {
 	int isFull;
 } circbuff
 
-
+#define FILENAME1_TO_RUN "consumer.dlx.obj"
+#define FILENAME2_TO_RUN "producer.dlx.obj"
 
 #endif

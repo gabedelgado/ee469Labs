@@ -4,7 +4,7 @@
 
 #include "circbuff.h"
 
-void main (int argv, char * argv[]){
+void main (int argc, char * argv[]){
 
 // if not full, head will be index position of first available slot 
 // if empty, it will be !isFull && head == tail
@@ -18,7 +18,7 @@ void main (int argv, char * argv[]){
 	s_procs_completed = dstrol(argv[2], NULL, 10);
 	lock = dstrol(argv[3], NULL, 10);
 	
-	if((thebuffer = (circuff *)shmat(h_mem)) == NULL){
+	if((thebuffer = (circbuff *)shmat(h_mem)) == NULL){
 		Printf("could not map the virtual address to memory in ");
 		Printf(argv[0]); 
 		Printf("exiting");
@@ -31,7 +31,7 @@ void main (int argv, char * argv[]){
 		// or wait for it to be available
 		// then produce the next character needed, ie
 		
-	char thestring[10] = "helloworld"
+	char thestring[10] = "helloworld";
 	
 	int i = 0;
 	for (i = 0; i < 10; i++){
@@ -49,16 +49,14 @@ void main (int argv, char * argv[]){
 			// haven't tested
 			
 			thebuffer->buffer[thebuffer->head] = thestring[i];
-			thebuffer->head = thebuffer->head + 1;
+			Printf("Producer %d inserted: %c", getpid(), thestring[i]);
+			thebuffer->head = (thebuffer->head + 1) % 10;
 			if (thebuffer->head == thebuffer->tail){thebuffer->isFull = 1;}
 			else{thebuffer->isFull = 0;}
 			lock_release(lock);
 		}
-		
-		
 	}
+
 	sem_signal(s_procs_completed);
 	Exit();
-	
-
 }

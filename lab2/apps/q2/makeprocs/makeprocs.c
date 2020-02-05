@@ -1,0 +1,58 @@
+#include "lab2-api.h"
+#include "usertraps.h"
+#include "misc.h"
+
+#include "circbuff.h"
+
+void main (int argc, char * argv[]){
+
+    int numprocs = 0; 
+    int i;
+    circbuff * buff;
+    uint32 h_mem;
+    sem_t s_procs_completed;
+    char h_mem_str[10];
+    char s_procs_completed_str[10];
+    lock_t lock;
+    char lock_str[10];
+
+    if (argc != 2){
+        Printf("usage: filetoexecute.xx : <number of processess to create");
+        Exit();
+    }
+
+    numprocs = dstrol(argv[1], NULL, 10);
+    Printf("Creating %d processes\n", numprocs);
+      
+    if ((h_mem = shmget()) == 0) {
+        Printf("ERROR: could not allocate shared memory page in "); Printf(argv[0]); Printf(", exiting...\n");
+        Exit();
+    }
+
+    if ((buff = (circbuff *)shmat(h_mem)) == NULL) {
+        Printf("Could not map the shared page to virtual address in "); Printf(argv[0]); Printf(", exiting..\n");
+        Exit();
+    }
+
+    if ((lock = lock_create()) == NULL){
+        Printf("could not create lock correctly");
+        Exit();
+    }
+
+    if ((s_procs_completed = sem_create(-(numprocs-1))) == SYNC_FAIL) {
+        Printf("Bad sem_create in "); Printf(argv[0]); Printf("\n");
+        Exit();
+    }
+
+    ditoa(h_mem, h_mem_str);
+    ditoa(s_procs_completed, s_procs_completed_str);
+    ditoa(lock, lock_str);
+
+    for(i = 0; i < numprocs; i++){
+        process_create(FILENAME1_TO_RUN, h_mem_str, s_procs_completed_str, lock_str, NULL);
+        process_create(FILENAME2_TO_RUN, h_mem_str, s_procs_completed_str, lock_str, NULL);
+        Printf("2 processess created");
+    }
+    if (sem_wait(s_procs_completed) != SYNC_SUCCESS)
+
+}
