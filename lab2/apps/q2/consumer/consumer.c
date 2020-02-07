@@ -14,9 +14,9 @@ void main (int argc, char * argv[]){
 	sem_t s_procs_completed;
 	lock_t lock;
 	
-	h_mem = dstrol(argv[1], NULL, 10);
-	s_procs_completed = dstrol(argv[2], NULL, 10);
-	lock = dstrol(argv[3], NULL, 10);
+	h_mem = dstrtol(argv[1], NULL, 10);
+	s_procs_completed = dstrtol(argv[2], NULL, 10);
+	lock = dstrtol(argv[3], NULL, 10);
 	
 	if((thebuffer = (circbuff *)shmat(h_mem)) == NULL){
 		Printf("could not map the virtual address to memory in ");
