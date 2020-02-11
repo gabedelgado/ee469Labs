@@ -6,7 +6,8 @@ typedef struct circbuff {
 	int tail;
 	char buffer[10];
 	int isFull;
-} circbuff
+} circbuff;
+
 
 #define FILENAME1_TO_RUN "consumer.dlx.obj"
 #define FILENAME2_TO_RUN "producer.dlx.obj"

@@ -4,38 +4,33 @@
 
 #include "circbuff.h"
 
-void main (int argc, char * argv[]){
-
-// if not full, head will be index position of first available slot 
-// if empty, it will be !isFull && head == tail
-
+void main(int argc, char *argv[])
+{
 	circbuff * thebuffer;
-	uint32 h_mem;
+	int h_mem;
 	sem_t s_procs_completed;
 	lock_t lock;
+	char thestring[11] = "hello world";
+	int i = 0;
 	
-	h_mem = dstrol(argv[1], NULL, 10);
-	s_procs_completed = dstrol(argv[2], NULL, 10);
-	lock = dstrol(argv[3], NULL, 10);
+	h_mem = dstrtol(argv[1], NULL, 10);
+	s_procs_completed = dstrtol(argv[2], NULL, 10);
+	lock = dstrtol(argv[3], NULL, 10);
 	
-	if((thebuffer = (circbuff *)shmat(h_mem)) == NULL){
+	thebuffer = (circbuff *)shmat(h_mem);
+
+	if(thebuffer == NULL){
 		Printf("could not map the virtual address to memory in ");
 		Printf(argv[0]); 
 		Printf("exiting");
 		Exit();
 	}
 	
-	// for loop to iterate through the length of the message we are 		// putting in the circbuff ("helloworld" has 10 char)
-	
-		// inside for loop, need to take control of lock, or wait
-		// or wait for it to be available
-		// then produce the next character needed, ie
-		
-	char thestring[10] = "helloworld";
-	
-	int i = 0;
-	for (i = 0; i < 10; i++){
-		while(lock_acquire(lock) != SYNC_SUCCESS); //wait to get lock
+	for (i = 0; i < 11; i++){
+		if (lock_acquire(lock) != SYNC_SUCCESS)
+		{
+			Printf("couldnt acquire lock");
+		} //wait to get lock
 		
 		//check if buffer is full
 		if (thebuffer->isFull){
@@ -49,7 +44,7 @@ void main (int argc, char * argv[]){
 			// haven't tested
 			
 			thebuffer->buffer[thebuffer->head] = thestring[i];
-			Printf("Producer %d inserted: %c", getpid(), thestring[i]);
+			Printf("Producer %d inserted: %c\n", getpid(), thestring[i]);
 			thebuffer->head = (thebuffer->head + 1) % 10;
 			if (thebuffer->head == thebuffer->tail){thebuffer->isFull = 1;}
 			else{thebuffer->isFull = 0;}

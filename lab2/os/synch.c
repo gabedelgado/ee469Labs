@@ -13,6 +13,7 @@
 
 static Sem sems[MAX_SEMS]; 	// All semaphores in the system
 static Lock locks[MAX_LOCKS];   // All locks in the system
+static Cond conds[MAX_CONDS]; //All locks in the system
 
 extern struct PCB *currentPCB; 
 //----------------------------------------------------------------------
@@ -325,7 +326,35 @@ int LockHandleRelease(lock_t lock) {
 //--------------------------------------------------------------------------
 cond_t CondCreate(lock_t lock) {
   // Your code goes here
-  return SYNC_FAIL;
+  cond_t cond;
+  uint32 intrval;
+
+  // grabbing a semaphore should be an atomic operation
+  intrval = DisableIntrs();
+  for(cond=0; cond<MAX_CONDS; cond++) {
+    if(conds[cond].inuse==0) {
+      conds[cond].inuse = 1;
+      break;
+    }
+  }
+  RestoreIntrs(intrval);
+
+  if(cond==MAX_CONDS) return INVALID_COND;
+  if (!lock) return INVALID_COND;
+
+  if (CondInit(&conds[cond], lock) != SYNC_SUCCESS) return INVALID_COND;
+  return cond;
+}
+
+int CondInit (Cond *cond, Lock *lock) {
+  if (!cond) return SYNC_FAIL;
+  if (!lock) return SYNC_FAIL;
+  if (AQueueInit (&cond->waiting) != QUEUE_SUCCESS) {
+    printf("FATAL ERROR: could not initialize conditional variable waiting queue in CondInit!\n");
+    exitsim();
+  }
+  cond->lock = lock;
+  return SYNC_SUCCESS;
 }
 
 //---------------------------------------------------------------------------
@@ -353,6 +382,8 @@ cond_t CondCreate(lock_t lock) {
 //---------------------------------------------------------------------------
 int CondHandleWait(cond_t c) {
   // Your code goes here
+  if (!c->lock) return 1;
+  
   return SYNC_SUCCESS;
 }
 

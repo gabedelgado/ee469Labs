@@ -17,11 +17,11 @@ void main (int argc, char * argv[]){
     char lock_str[10];
 
     if (argc != 2){
-        Printf("usage: filetoexecute.xx : <number of processess to create");
+        Printf("usage: filetoexecute.xx : <number of processess to create>");
         Exit();
     }
 
-    numprocs = dstrol(argv[1], NULL, 10);
+    numprocs = dstrtol(argv[1], NULL, 10);
     Printf("Creating %d processes\n", numprocs);
       
     if ((h_mem = shmget()) == 0) {
@@ -34,12 +34,12 @@ void main (int argc, char * argv[]){
         Exit();
     }
 
-    if ((lock = lock_create()) == NULL){
+    if ((lock = lock_create()) == SYNC_FAIL){
         Printf("could not create lock correctly");
         Exit();
     }
 
-    if ((s_procs_completed = sem_create(-(numprocs-1))) == SYNC_FAIL) {
+    if ((s_procs_completed = sem_create(-1 * (2 * numprocs-1))) == SYNC_FAIL) {
         Printf("Bad sem_create in "); Printf(argv[0]); Printf("\n");
         Exit();
     }
@@ -49,10 +49,15 @@ void main (int argc, char * argv[]){
     ditoa(lock, lock_str);
 
     for(i = 0; i < numprocs; i++){
-        process_create(FILENAME1_TO_RUN, h_mem_str, s_procs_completed_str, lock_str, NULL);
         process_create(FILENAME2_TO_RUN, h_mem_str, s_procs_completed_str, lock_str, NULL);
-        Printf("2 processess created");
+        process_create(FILENAME1_TO_RUN, h_mem_str, s_procs_completed_str, lock_str, NULL);
+        Printf("2 processess created\n");
     }
-    if (sem_wait(s_procs_completed) != SYNC_SUCCESS)
+
+    if (sem_wait(s_procs_completed) != SYNC_SUCCESS) {
+        Printf("Bad semaphore s_procs_completed (%d) in ", s_procs_completed); Printf(argv[0]); Printf("\n");
+        Exit();
+    }
+    Printf("All other processes completed, exiting main process.\n");
 
 }
