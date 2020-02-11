@@ -58,14 +58,7 @@ void main (int argc, char * argv[]){
         Printf("Bad semaphore s_procs_completed (%d) in ", s_procs_completed); Printf(argv[0]); Printf("\n");
         Exit();
     }
-<<<<<<< HEAD
-=======
 
-    if (sem_wait(s_procs_completed) != SYNC_SUCCESS) {
-        Printf("Bad semaphore s_procs_completed (%d) in ", s_procs_completed); Printf(argv[0]); Printf("\n");
-        Exit();
-    }
->>>>>>> 3efeeddef6b28392c56899e22b6c8ec42246464c
     Printf("All other processes completed, exiting main process.\n");
 
 }
