@@ -338,12 +338,12 @@ cond_t CondCreate(lock_t lock) {
     }
   }
   RestoreIntrs(intrval);
-  printf("gothere1");
+  //printf("gothere1");
   if(cond==MAX_CONDS) return INVALID_COND;
-  printf("lock num %d", lock);
-  if (!lock) return INVALID_COND;
+  //printf("lock num %d", lock);
+  if (lock < 0 || lock >= MAX_LOCKS) return INVALID_COND;
 
-  printf("gothere2");
+  //printf("gothere2");
   if (CondInit(&conds[cond], &locks[lock]) != SYNC_SUCCESS) return INVALID_COND;
   // conds[cond].lockint = lock;
   return cond;
