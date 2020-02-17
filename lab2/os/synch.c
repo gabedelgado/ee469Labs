@@ -506,7 +506,7 @@ int CondBroadcast (Cond *c) {
   int	intrs;
   PCB *pcb;
   int lengthQueue;
-
+  int i;
   if (!c) return SYNC_FAIL;
 
   intrs = DisableIntrs ();
@@ -515,7 +515,7 @@ int CondBroadcast (Cond *c) {
 
   lengthQueue = AQueueLength(&c->waiting);
 
-  for(int i = 0;i<lengthQueue;++i){
+  for(i = 0;i<lengthQueue;++i){
     if (!AQueueEmpty(&c->waiting)) { // there is a process to wake up
     
       l = AQueueFirst(&c->waiting);
