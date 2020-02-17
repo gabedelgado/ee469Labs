@@ -43,6 +43,7 @@ void main (int argc, char * argv[]){
         Printf("Bad sem_create in "); Printf(argv[0]); Printf("\n");
         Exit();
     }
+    Printf("lock num in makeprocs %d", lock);
 
     ditoa(h_mem, h_mem_str);
     ditoa(s_procs_completed, s_procs_completed_str);
