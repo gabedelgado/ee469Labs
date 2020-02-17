@@ -49,7 +49,7 @@ void main (int argc, char * argv[]){
         Printf("Bad sem_create in "); Printf(argv[0]); Printf("\n");
         Exit();
     }
-
+    Printf("lock val in makeprocs %d", lock);
     if ((fullcond = cond_create(lock)) == SYNC_FAIL){
         Printf("could not create condition variable fullcond");
         Exit();
