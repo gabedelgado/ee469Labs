@@ -342,7 +342,8 @@ cond_t CondCreate(lock_t lock) {
   if(cond==MAX_CONDS) return INVALID_COND;
   if (!lock) return INVALID_COND;
 
-  if (CondInit(&conds[cond], lock) != SYNC_SUCCESS) return INVALID_COND;
+  if (CondInit(&conds[cond], &locks[lock]) != SYNC_SUCCESS) return INVALID_COND;
+  conds[cond].lockint = lock;
   return cond;
 }
 
@@ -353,7 +354,7 @@ int CondInit (Cond *cond, Lock *lock) {
     printf("FATAL ERROR: could not initialize conditional variable waiting queue in CondInit!\n");
     exitsim();
   }
-  cond->lock = lock;
+  cond->lock = *lock;
   return SYNC_SUCCESS;
 }
 
@@ -382,8 +383,39 @@ int CondInit (Cond *cond, Lock *lock) {
 //---------------------------------------------------------------------------
 int CondHandleWait(cond_t c) {
   // Your code goes here
-  if (!c->lock) return 1;
+  if (!&(conds[c].lock)) return 1;
   
+  if (c < 0) return SYNC_FAIL;
+  if (c >= MAX_CONDS) return SYNC_FAIL;
+  if (!conds[c].inuse)    return SYNC_FAIL;
+  return CondWait(&conds[c]);
+  
+  return SYNC_SUCCESS;
+}
+
+int CondWait (Cond *c) {
+  Link	*l;
+  int		intrval;
+    
+  if (!c) return SYNC_FAIL;
+
+  intrval = DisableIntrs ();
+  dbprintf ('I', "CondWait: Old interrupt value was 0x%x.\n", intrval);
+  dbprintf ('s', "CondWait: Proc %d waiting on cond %d.\n", GetCurrentPid(), (int)(c-conds));
+
+  dbprintf('s', "CondWait: putting process %d to sleep\n", GetCurrentPid());
+  if ((l = AQueueAllocLink ((void *)currentPCB)) == NULL) {
+    printf("FATAL ERROR: could not allocate link for semaphore queue in CondWait!\n");
+    exitsim();
+  }
+  if (AQueueInsertLast (&c->waiting, l) != QUEUE_SUCCESS) {
+    printf("FATAL ERROR: could not insert new link into cond waiting queue in CondWait!\n");
+    exitsim();
+  }
+  LockHandleRelease(c->lockint);
+  ProcessSleep();
+   
+  RestoreIntrs (intrval);
   return SYNC_SUCCESS;
 }
 
@@ -410,9 +442,39 @@ int CondHandleWait(cond_t c) {
 //---------------------------------------------------------------------------
 int CondHandleSignal(cond_t c) {
   // Your code goes here
+  if (c < 0) return SYNC_FAIL;
+  if (c >= MAX_CONDS) return SYNC_FAIL;
+  if (!conds[c].inuse)    return SYNC_FAIL;
+  return CondSignal(&conds[c]);
+
   return SYNC_SUCCESS;
 }
 
+int CondSignal (Cond *c) {
+  Link *l;
+  int	intrs;
+  PCB *pcb;
+
+  if (!c) return SYNC_FAIL;
+
+  intrs = DisableIntrs ();
+  dbprintf ('s', "CondSignal: Process %d Signalling on cond %d.\n", GetCurrentPid(), (int)(c-conds));
+  // Increment internal counter before checking value
+
+  if (!AQueueEmpty(&c->waiting)) { // there is a process to wake up
+    l = AQueueFirst(&c->waiting);
+    pcb = (PCB *)AQueueObject(l);
+    if (AQueueRemove(&l) != QUEUE_SUCCESS) { 
+      printf("FATAL ERROR: could not remove link from cond queue in CondSignal!\n");
+      exitsim();
+    }
+    dbprintf ('s', "CondSignal: Waking up PID %d.\n", (int)(GetPidFromAddress(pcb)));
+    ProcessWakeup (pcb);
+
+  }
+  RestoreIntrs (intrs);
+  return SYNC_SUCCESS;
+}
 //---------------------------------------------------------------------------
 //	CondHandleBroadcast
 //
@@ -430,5 +492,43 @@ int CondHandleSignal(cond_t c) {
 //---------------------------------------------------------------------------
 int CondHandleBroadcast(cond_t c) {
   // Your code goes here
+  if (c < 0) return SYNC_FAIL;
+  if (c >= MAX_CONDS) return SYNC_FAIL;
+  if (!conds[c].inuse)    return SYNC_FAIL;
+  return CondBroadcast(&conds[c]);
+
+  return SYNC_SUCCESS;
+}
+
+
+int CondBroadcast (Cond *c) {
+  Link *l;
+  int	intrs;
+  PCB *pcb;
+  int lengthQueue;
+
+  if (!c) return SYNC_FAIL;
+
+  intrs = DisableIntrs ();
+  dbprintf ('s', "CondSignal: Process %d Signalling on cond %d.\n", GetCurrentPid(), (int)(c-conds));
+  // Increment internal counter before checking value
+
+  lengthQueue = AQueueLength(&c->waiting);
+
+  for(int i = 0;i<lengthQueue;++i){
+    if (!AQueueEmpty(&c->waiting)) { // there is a process to wake up
+    
+      l = AQueueFirst(&c->waiting);
+      pcb = (PCB *)AQueueObject(l);
+      if (AQueueRemove(&l) != QUEUE_SUCCESS) { 
+        printf("FATAL ERROR: could not remove link from cond queue in CondSignal!\n");
+        exitsim();
+      }
+
+      dbprintf ('s', "CondSignal: Waking up PID %d.\n", (int)(GetPidFromAddress(pcb)));
+      ProcessWakeup (pcb);     
+    }
+  }
+  RestoreIntrs (intrs);
   return SYNC_SUCCESS;
 }

@@ -60,9 +60,10 @@ typedef struct Cond {
   Queue	waiting;
   uint32	inuse;
   Lock lock;
+  lock_t lockint;
 } Cond;
 
-int CondInit(Cond *);
+int CondInit(Cond *, Lock *);
 int CondWait(Cond *);
 int CondSignal(Cond *);
 
