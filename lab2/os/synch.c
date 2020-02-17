@@ -340,6 +340,7 @@ cond_t CondCreate(lock_t lock) {
   RestoreIntrs(intrval);
   printf("gothere1");
   if(cond==MAX_CONDS) return INVALID_COND;
+  printf("lock num %d", lock);
   if (!lock) return INVALID_COND;
 
   printf("gothere2");
