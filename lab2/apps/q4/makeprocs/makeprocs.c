@@ -15,6 +15,12 @@ void main (int argc, char * argv[]){
     char s_procs_completed_str[10];
     lock_t lock;
     char lock_str[10];
+    cond_t fullcond;
+    cond_t emptycond;
+    char fullcond_str[10];
+    char emptycond_str[10];
+
+
 
     if (argc != 2){
         Printf("usage: filetoexecute.xx : <number of processess to create>");
@@ -44,13 +50,27 @@ void main (int argc, char * argv[]){
         Exit();
     }
 
+    if ((fullcond = cond_create(lock)) == SYNC_FAIL){
+        Printf("could not create condition variable fullcond");
+        Exit();
+    }
+
+    if ((emptycond = cond_create(lock)) == SYNC_FAIL){
+        Printf("could not create condition variable emptycond");
+        Exit();
+    }
+
     ditoa(h_mem, h_mem_str);
     ditoa(s_procs_completed, s_procs_completed_str);
     ditoa(lock, lock_str);
+    ditoa(emptycond, emptycond_str);
+    ditoa(fullcond, fullcond_str);
+
+
 
     for(i = 0; i < numprocs; i++){
-        process_create(FILENAME2_TO_RUN, h_mem_str, s_procs_completed_str, lock_str, NULL);
-        process_create(FILENAME1_TO_RUN, h_mem_str, s_procs_completed_str, lock_str, NULL);
+        process_create(FILENAME2_TO_RUN, h_mem_str, s_procs_completed_str, lock_str, emptycond_str, fullcond_str, NULL);
+        process_create(FILENAME1_TO_RUN, h_mem_str, s_procs_completed_str, lock_str, emptycond_str, fullcond_str, NULL);
         Printf("2 processess created\n");
     }
 

@@ -343,7 +343,7 @@ cond_t CondCreate(lock_t lock) {
   if (!lock) return INVALID_COND;
 
   if (CondInit(&conds[cond], &locks[lock]) != SYNC_SUCCESS) return INVALID_COND;
-  conds[cond].lockint = lock;
+  // conds[cond].lockint = lock;
   return cond;
 }
 
@@ -412,7 +412,7 @@ int CondWait (Cond *c) {
     printf("FATAL ERROR: could not insert new link into cond waiting queue in CondWait!\n");
     exitsim();
   }
-  LockHandleRelease(c->lockint);
+  LockRelease(&c->lock);
   ProcessSleep();
    
   RestoreIntrs (intrval);
