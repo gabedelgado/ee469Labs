@@ -17,7 +17,7 @@ void main (int argc, char * argv[]){
 
 
     for(int i = 0; i < number_molecules;++i){
-        Print("SO4 injected into Radeon atmosphere, PID: %d",getpid());
+        Printf("SO4 injected into Radeon atmosphere, PID: %d",getpid());
         sem_signal(s_sO2);
         sem_signal(s_O2);
     }
