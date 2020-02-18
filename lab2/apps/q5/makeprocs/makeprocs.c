@@ -27,6 +27,7 @@ void main (int argc, char * argv[]){
     char numh20_str[10];
     char numso4_str[10];
     char react3count_str[10];
+    char numh20str2[10];
 
     if (argc != 3){
         Printf("usage: filetoexecute.xx : <number of processess to create>");
@@ -94,6 +95,7 @@ void main (int argc, char * argv[]){
     ditoa(nums04, numso4_str);
     ditoa(react3count, react3count_str);
     ditoa(s_procs_completed, s_procs_completed_str);
+    ditoa(numh20, numh20str2);
 
 
     // NEED TO CALCULATE NUMBER OF REACTIONS EXPECTED FOR EACH REACT PROCESS, FROM THE NUMBER OF H20 AND S04 ???
@@ -103,7 +105,7 @@ void main (int argc, char * argv[]){
     process_create(REACT2_TO_RUN, s_so4_str, numso4_str, s_procs_completed_str, s_o2_str, s_so2_str, NULL);
     process_create(REACT3_TO_RUN, s_h2_str, s_o2_str, s_so2_str, react3count_str, s_procs_completed_str, NULL);
     
-    process_create(INJECT1_TO_RUN, s_h2o_str, numh20_str, s_procs_completed_str, NULL);
+    process_create(INJECT1_TO_RUN, s_h2o_str, numh20str2, s_procs_completed_str, NULL);
     process_create(INJECT2_TO_RUN, s_so4_str, numso4_str, s_procs_completed_str, NULL);
 
     // MAYBE MAIN SEMAPHORE FOR ALL OF THE PROCESSES TO SIGNAL COMPLETION
