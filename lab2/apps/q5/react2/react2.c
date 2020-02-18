@@ -18,7 +18,7 @@ void main (int argc, char * argv[]){
     s_o2 = dstrtol(argv[4], NULL, 10);
 
 
-    for(i = 0; i < so4count; i++){
+    for(i = 0; i < sO4count; i++){
         sem_wait(s_so4);
         Printf("SO4 -> SO2 + O2 reacted, PID: %d\n", getpid());
         sem_signal(s_so2);
