@@ -7,13 +7,12 @@ void main (int argc, char * argv[]){
 
     int numh20 = 0; 
     int nums04 = 0;
-    int i;
     int h2count = 0;
     int o2count = 0;
     int so2count = 0;
     int react3count = 0;
-    // sem_t s_procs_completed;
-    // char s_procs_completed_str[10];
+    sem_t s_procs_completed;
+    char s_procs_completed_str[10];
     sem_t s_h2o;
     sem_t s_so4;
     sem_t s_h2;
@@ -25,9 +24,9 @@ void main (int argc, char * argv[]){
     char s_h2_str[10];
     char s_o2_str[10];
     char s_so2_str[10];
-
     char numh20_str[10];
     char numso4_str[10];
+    char react3count_str[10];
 
     if (argc != 3){
         Printf("usage: filetoexecute.xx : <number of processess to create>");
@@ -45,17 +44,15 @@ void main (int argc, char * argv[]){
 
     react3count = h2count;
 
-    if (o2count < h2count){
+    if (o2count <= h2count && o2count <= so2count){
         react3count = o2count;
-        if ()
     }
-    if (o2count < so2count)
-    
-    // if ((s_procs_completed = sem_create(-1 * (2 * numprocs-1))) == SYNC_FAIL) {
-    //     Printf("Bad sem_create in "); Printf(argv[0]); Printf("\n");
-    //     Exit();
-    // }
-    
+    else if (h2count <= o2count && h2count <= so2count){
+        react3count = h2count;
+    }
+    else {
+        react3count = so2count;
+    }
     
     if ((s_h2o = sem_create(-1) == SYNC_FAIL)) {
         Printf("Bad sem_create in s_h2o"); Printf("\n");
@@ -81,6 +78,11 @@ void main (int argc, char * argv[]){
         Printf("Bad sem_create in s_so2"); Printf("\n");
         Exit();
     }
+
+    if ((s_procs_completed = sem_create(-4)) == SYNC_FAIL) {
+        Printf("Bad sem_create in "); Printf(argv[0]); Printf("\n");
+        Exit();
+    }
     // ditoa(s_procs_completed, s_procs_completed_str);
     
     ditoa(s_h2o, s_h2o_str);
@@ -88,25 +90,23 @@ void main (int argc, char * argv[]){
     ditoa(s_h2, s_h2_str);
     ditoa(s_o2, s_o2_str);
     ditoa(s_so2, s_so2_str);
-    ditoa(numh20 % 2, numh20_str);
+    ditoa((int)(numh20 / 2), numh20_str);
     ditoa(nums04, numso4_str);
+    ditoa(react3count, react3count_str);
+    ditoa(s_procs_completed, s_procs_completed_str);
 
 
     // NEED TO CALCULATE NUMBER OF REACTIONS EXPECTED FOR EACH REACT PROCESS, FROM THE NUMBER OF H20 AND S04 ???
 
 
-    process_create(REACT1_TO_RUN, s_h2o_str, numh20_str, NULL);
-    process_create(REACT2_TO_RUN, s_so4_str, numso4_str, NULL);
-    process_create(REACT3_TO_RUN, s_h2_str, s_o2_str, s_so2_str, NULL);
+    process_create(REACT1_TO_RUN, s_h2o_str, numh20_str, s_procs_completed_str, s_o2_str, s_h2_str, NULL);
+    process_create(REACT2_TO_RUN, s_so4_str, numso4_str, s_procs_completed_str, s_o2_str, s_so2_str, NULL);
+    process_create(REACT3_TO_RUN, s_h2_str, s_o2_str, s_so2_str, react3count_str, s_procs_completed_str, NULL);
     
-    process_create(INJECT1_TO_RUN, NULL);
-    process_create(INJECT2_TO_RUN, NULL);
+    process_create(INJECT1_TO_RUN, s_h2o_str, numh20_str, s_procs_completed_str, NULL);
+    process_create(INJECT2_TO_RUN, s_so4_str, numso4_str, s_procs_completed_str, NULL);
 
-    // for(i = 0; i < numprocs; i++){
-    //     process_create(FILENAME2_TO_RUN, h_mem_str, s_procs_completed_str, lock_str, emptycond_str, fullcond_str, NULL);
-    //     process_create(FILENAME1_TO_RUN, h_mem_str, s_procs_completed_str, lock_str, emptycond_str, fullcond_str, NULL);
-    //     Printf("2 processess created\n");
-    // }
+    // MAYBE MAIN SEMAPHORE FOR ALL OF THE PROCESSES TO SIGNAL COMPLETION
 
     if (sem_wait(s_procs_completed) != SYNC_SUCCESS) {
         Printf("Bad semaphore s_procs_completed (%d) in ", s_procs_completed); Printf(argv[0]); Printf("\n");
