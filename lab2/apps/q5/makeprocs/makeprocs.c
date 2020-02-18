@@ -54,27 +54,27 @@ void main (int argc, char * argv[]){
         react3count = so2count;
     }
     
-    if ((s_h2o = sem_create(-1) == SYNC_FAIL)) {
+    if ((s_h2o = sem_create(0) == SYNC_FAIL)) {
         Printf("Bad sem_create in s_h2o"); Printf("\n");
         Exit();
     }
 
-    if ((s_so4 = sem_create(-1) == SYNC_FAIL)) {
+    if ((s_so4 = sem_create(0) == SYNC_FAIL)) {
         Printf("Bad sem_create in s_so4"); Printf("\n");
         Exit();
     }
 
-    if ((s_h2 = sem_create(-1) == SYNC_FAIL)) {
+    if ((s_h2 = sem_create(0) == SYNC_FAIL)) {
         Printf("Bad sem_create in s_h2"); Printf("\n");
         Exit();
     }
 
-    if ((s_o2 = sem_create(-1) == SYNC_FAIL)) {
+    if ((s_o2 = sem_create(0) == SYNC_FAIL)) {
         Printf("Bad sem_create in s_o2"); Printf("\n");
         Exit();
     }
 
-    if ((s_so2 = sem_create(-1) == SYNC_FAIL)) {
+    if ((s_so2 = sem_create(0) == SYNC_FAIL)) {
         Printf("Bad sem_create in s_so2"); Printf("\n");
         Exit();
     }
