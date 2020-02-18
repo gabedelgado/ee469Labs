@@ -18,15 +18,9 @@ void main (int argc, char * argv[]){
 
     for(int i = 0; i < number_molecules;++i){
         Printf("H2O injected into Radeon atmosphere, PID: %d",getpid());
-        if ((i+1) % 2 == 0){
-            sem_signal(s_h2);
-            sem_signal(s_h2);
-            sem_signal(s_o2);
-        }
+        sem_signal(h20);
     }
 
-    sem_signal(parent)
-
-    return;
+    sem_signal(parent);
     
 }

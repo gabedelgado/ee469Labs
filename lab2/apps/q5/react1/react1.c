@@ -28,8 +28,6 @@ void main (int argc, char * argv[]){
         sem_signal(s_h2);
         sem_signal(s_o2);
 
-     
-
     }
     sem_signal(s_procs_completed);
 
