@@ -115,6 +115,6 @@ void main (int argc, char * argv[]){
         Exit();
     }
 
-    Printf("All other processes completed, exiting main process.\n");
+    Printf("%d H2O's left over. %d H2's left over. %d O2's left over. %d SO2's left over. %d H2SO4's created.\n", numh20 % 2, h2count - react3count, o2count - react3count, so2count - react3count, react3count);
 
 }
