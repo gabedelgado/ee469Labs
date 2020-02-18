@@ -10,7 +10,7 @@ void main (int argc, char * argv[]){
     sem_t parent;
     int number_molecules;
     int i;
-    
+
     numh20 = dstrtol(argv[2], NULL, 10);
     h20 = dstrtol(argv[1],NULL,10);
     parent = dstrtol(argv[3],NULL,10);
@@ -19,7 +19,7 @@ void main (int argc, char * argv[]){
 
 
     for(i = 0; i < number_molecules;++i){
-        Printf("H2O injected into Radeon atmosphere, PID: %d",getpid());
+        Printf("H2O injected into Radeon atmosphere, PID: %d\n",getpid());
         sem_signal(h20);
     }
 

@@ -23,7 +23,7 @@ void main (int argc, char * argv[]){
         sem_wait(s_so2);
         sem_wait(s_h2);
 
-        Printf("(%d) H2 + O2 + SO2 -> H2SO4 reacted, PID: %d", i + 1, getpid());
+        Printf("(%d) H2 + O2 + SO2 -> H2SO4 reacted, PID: %d\n", i + 1, getpid());
     }
     
     sem_signal(s_procs_completed);
