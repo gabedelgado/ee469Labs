@@ -17,7 +17,7 @@ void main (int argc, char * argv[]){
     s_h2 = dstrtol(argv[5], NULL, 10);
     s_o2 = dstrtol(argv[4], NULL, 10);
 
-    Printf("%dh20count in react1 %d", h2ocount);
+    //Printf("%dh20count in react1 %d", h2ocount);
     for(i = 0; i < h2ocount; i++){
         sem_wait(s_h2o);
         sem_wait(s_h2o);

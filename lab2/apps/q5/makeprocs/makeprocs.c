@@ -39,8 +39,8 @@ void main (int argc, char * argv[]){
     
     //Printf("Creating %d processes\n", numprocs);
 
-    h2count = numh20;
-    o2count = numh20 % 2 + nums04;
+    h2count = (int)(numh20/2) * 2;
+    o2count = (int)(numh20 / 2) + nums04;
     so2count = nums04;
 
     react3count = h2count;
