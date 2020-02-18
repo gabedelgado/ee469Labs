@@ -8,6 +8,10 @@ void main (int argc, char * argv[]){
     int numh20 = 0; 
     int nums04 = 0;
     int i;
+    int h2count = 0;
+    int o2count = 0;
+    int so2count = 0;
+    int react3count = 0;
     // sem_t s_procs_completed;
     // char s_procs_completed_str[10];
     sem_t s_h2o;
@@ -35,7 +39,17 @@ void main (int argc, char * argv[]){
     
     //Printf("Creating %d processes\n", numprocs);
 
+    h2count = numh20;
+    o2count = numh20 % 2 + nums04;
+    so2count = nums04;
 
+    react3count = h2count;
+
+    if (o2count < h2count){
+        react3count = o2count;
+        if ()
+    }
+    if (o2count < so2count)
     
     // if ((s_procs_completed = sem_create(-1 * (2 * numprocs-1))) == SYNC_FAIL) {
     //     Printf("Bad sem_create in "); Printf(argv[0]); Printf("\n");
@@ -74,13 +88,15 @@ void main (int argc, char * argv[]){
     ditoa(s_h2, s_h2_str);
     ditoa(s_o2, s_o2_str);
     ditoa(s_so2, s_so2_str);
-    ditoa(numh20, numh20_str);
-    ditoa(numh20, numh20_str);
+    ditoa(numh20 % 2, numh20_str);
+    ditoa(nums04, numso4_str);
+
 
     // NEED TO CALCULATE NUMBER OF REACTIONS EXPECTED FOR EACH REACT PROCESS, FROM THE NUMBER OF H20 AND S04 ???
 
-    process_create(REACT1_TO_RUN, s_h2o_str, NULL);
-    process_create(REACT2_TO_RUN, s_so4_str, NULL);
+
+    process_create(REACT1_TO_RUN, s_h2o_str, numh20_str, NULL);
+    process_create(REACT2_TO_RUN, s_so4_str, numso4_str, NULL);
     process_create(REACT3_TO_RUN, s_h2_str, s_o2_str, s_so2_str, NULL);
     
     process_create(INJECT1_TO_RUN, NULL);
