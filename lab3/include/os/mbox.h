@@ -17,6 +17,13 @@ typedef struct mbox_message {
 } mbox_message;
 
 typedef struct mbox {
+    queue msg_queue;
+    lock_t lock;
+    cond_t notfull;
+    cond_t not_empty;
+    PCB procs[];
+    int inuse;
+
 } mbox;
 
 typedef int mbox_t; // This is the "type" of mailbox handles
