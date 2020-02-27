@@ -238,7 +238,6 @@ int MboxRecv(mbox_t handle, int maxlength, void* message) {
   	Link * l;
 	int pid = GetCurrentPid();
 	int i = 0;
-	uint32 intrval;
 	mbox_message * inboundmsg;
 
 	LockHandleAcquire(mboxes[handle].lock);
@@ -261,7 +260,7 @@ int MboxRecv(mbox_t handle, int maxlength, void* message) {
 		printf("there was an issue with maxlength v message length");
 		return MBOX_FAIL;
 	}
-	bcopy(inboundmsg, message, inboundmsg->length);
+	bcopy(inboundmsg->buffer, message, inboundmsg->length);
 	if (AQueueLength(&mboxes[handle].msg_queue) == MBOX_MAX_BUFFERS_PER_MBOX){
 		CondHandleSignal(mboxes[handle].notfull);
 	}

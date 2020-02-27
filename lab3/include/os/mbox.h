@@ -41,6 +41,7 @@ int MboxClose(mbox_t m);
 int MboxSend(mbox_t m, int length, void *message);
 int MboxRecv(mbox_t m, int maxlength, void *message);
 int MboxCloseAllByPid(int pid);
+int mboxInit(mbox * m);
 
 #ifndef false
 #define false 0
