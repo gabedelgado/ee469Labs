@@ -113,7 +113,7 @@ void ProcessSetStatus (PCB *pcb, int status) {
 void ProcessFreeResources (PCB *pcb) {
   int i = 0;
   int npages = 0;
-
+  int pid = GetCurrentPid();
   dbprintf ('p', "ProcessFreeResources: function started\n");
 
 
@@ -121,7 +121,7 @@ void ProcessFreeResources (PCB *pcb) {
   // Your code for closing any open mailbox connections
   // that a dying process might have goes here.
   //-----------------------------------------------------
-
+  MboxCloseAllByPid(pid);
 
   // Allocate a new link for this pcb on the freepcbs queue
   if ((pcb->l = AQueueAllocLink(pcb)) == NULL) {
