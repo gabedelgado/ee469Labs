@@ -14,16 +14,18 @@
 //--------------------------------------------
 
 typedef struct mbox_message {
+    char buffer[MBOX_MAX_MESSAGE_LENGTH];
+    int length;
+    int inuse;
 } mbox_message;
 
 typedef struct mbox {
-    queue msg_queue;
+    Queue msg_queue;
     lock_t lock;
     cond_t notfull;
     cond_t not_empty;
-    PCB procs[];
     int inuse;
-
+    int procs[30]; // for this array -1 means no process using it at that element (ie, whole array of -1's means the mailbox is not being used by any processes at all)
 } mbox;
 
 typedef int mbox_t; // This is the "type" of mailbox handles

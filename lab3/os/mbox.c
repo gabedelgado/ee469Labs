@@ -5,6 +5,9 @@
 #include "queue.h"
 #include "mbox.h"
 
+static mbox mboxes[MBOX_NUM_MBOXES];
+static mbox_message messages[MBOX_NUM_BUFFERS];
+
 //-------------------------------------------------------
 //
 // void MboxModuleInit();
@@ -19,6 +22,13 @@
 //-------------------------------------------------------
 
 void MboxModuleInit() {
+	int i;
+	for (i = 0; i < MBOX_NUM_MBOXES; i++){
+		mboxes[i].inuse = false;
+	}
+	for (i = 0; i < MBOX_NUM_BUFFERS; i++){
+		messages[i].inuse = false;
+	}
 }
 
 //-------------------------------------------------------
@@ -32,7 +42,47 @@ void MboxModuleInit() {
 //
 //-------------------------------------------------------
 mbox_t MboxCreate() {
-  return MBOX_FAIL;
+	mbox_t m;
+	uint32 intrval;
+
+	intrval = DisableIntrs();
+	for(m = 0; m < MBOX_NUM_MBOXES; m++){
+		if(mboxes[m].inuse == false){
+			mboxes[m].inuse = true;
+			break;
+		}
+	}
+	RestoreIntrs(intrval);
+	if (m == MBOX_NUM_MBOXES) return MBOX_FAIL;
+
+	if (mboxInit(&mboxes[m]) == SYNC_FAIL) return MBOX_FAIL;
+	return m;
+}
+
+int mboxInit(mbox * m){
+	int i = 0;
+	if (!m) return SYNC_FAIL;
+	if (AQueueInit(&m->msg_queue) == QUEUE_FAIL) {
+		printf("ERROR: could not initialize mbox queue");
+		exitsim();
+	}
+	if ((m->lock = LockCreate()) == SYNC_FAIL) {
+		printf("ERROR: could not initialize mbox lock");
+		exitsim();
+	}
+	if ((m->notfull = CondCreate(m->lock)) == INVALID_COND){
+		printf("ERROR: could not initialize notfull mbox cond var");
+		exitsim();
+	}
+	if ((m->not_empty = CondCreate(m->lock)) == INVALID_COND){
+		printf("ERROR: could not initialize notfull mbox cond var");
+		exitsim();
+	}
+	for (i = 0; i < 30; i++){
+		m->procs[i] = -1;
+	}
+	return SYNC_SUCCESS;
+
 }
 
 //-------------------------------------------------------
@@ -50,7 +100,17 @@ mbox_t MboxCreate() {
 //
 //-------------------------------------------------------
 int MboxOpen(mbox_t handle) {
-  return MBOX_FAIL;
+	int pid = GetCurrentPid();
+	int i = 0;
+	LockHandleAcquire(mboxes[handle].lock);
+	while(mboxes[handle].procs[i] != -1){i++;}
+	if (i >= 30){
+		printf("ERROR: more than 30 procs using mbox");
+		exitsim();
+	}
+	mboxes[handle].procs[i] = pid;
+	LockHandleRelease(mboxes[handle].lock);
+	return MBOX_SUCCESS;
 }
 
 //-------------------------------------------------------
@@ -67,7 +127,30 @@ int MboxOpen(mbox_t handle) {
 //
 //-------------------------------------------------------
 int MboxClose(mbox_t handle) {
-  return MBOX_FAIL;
+	int pid = GetCurrentPid();
+	int i = 0;
+	LockHandleAcquire(mboxes[handle].lock);
+	while(mboxes[handle].procs[i] != pid){
+		if (i == 29){
+			printf("ERROR: could not find pid in procs list for mbox");
+			exitsim();	
+			break;
+		}	
+		i++;
+	}
+
+	mboxes[handle].procs[i] = -1;
+	i = 0;
+	while (mboxes[handle].procs[i] == -1){
+		if (i == 29){
+			mboxes[handle].inuse = false;
+			break; 
+		}
+		i++;
+	}
+
+	LockHandleRelease(mboxes[handle].lock);
+	return MBOX_SUCCESS;
 }
 
 //-------------------------------------------------------
@@ -87,7 +170,52 @@ int MboxClose(mbox_t handle) {
 //
 //-------------------------------------------------------
 int MboxSend(mbox_t handle, int length, void* message) {
-  return MBOX_FAIL;
+	Link * l;
+	int pid = GetCurrentPid();
+	int i = 0;
+	uint32 intrval;
+	LockHandleAcquire(mboxes[handle].lock);
+	// check that pid is in list of procs using mbox
+	while ( mboxes[handle].procs[i] != pid){
+		if (i == 29){
+			printf("currentpid was not on procs list");
+			exitsim();
+			break;
+		}
+		i++;
+	}
+	
+	if (AQueueLength(&mboxes[handle].msg_queue) >= MBOX_MAX_BUFFERS_PER_MBOX){	
+		CondHandleWait(mboxes[handle].notfull);
+		LockHandleAcquire(mboxes[handle].lock);
+	}
+	
+	intrval = DisableIntrs();
+	for (i = 0; i < MBOX_NUM_BUFFERS; i++){
+		if (messages[i].inuse == false){
+			messages[i].inuse = true;
+			break;
+		}
+	}
+	RestoreIntrs(intrval);
+
+	
+	if (i == MBOX_NUM_BUFFERS) return MBOX_FAIL;
+	bcopy(message, messages[i].buffer, length);
+	messages[i].length = length;
+	if ((l = AQueueAllocLink ((void *)&messages[i])) == NULL) {
+      	printf("FATAL ERROR: could not allocate link for message queue in mboxsend!\n");
+      	exitsim();
+    }
+    if (AQueueInsertLast (&mboxes[handle].msg_queue, l) != QUEUE_SUCCESS) {
+      	printf("FATAL ERROR: could not insert new link into mbox queue in mboxsend!\n");
+      	exitsim();
+    }
+	if (AQueueLength(&mboxes[handle].msg_queue) == 1){
+		CondHandleSignal(mboxes[handle].not_empty);
+	}
+	LockHandleRelease(mboxes[handle].lock);	
+  	return MBOX_SUCCESS;
 }
 
 //-------------------------------------------------------
@@ -107,7 +235,38 @@ int MboxSend(mbox_t handle, int length, void* message) {
 //
 //-------------------------------------------------------
 int MboxRecv(mbox_t handle, int maxlength, void* message) {
-  return MBOX_FAIL;
+  	Link * l;
+	int pid = GetCurrentPid();
+	int i = 0;
+	uint32 intrval;
+	mbox_message * inboundmsg;
+
+	LockHandleAcquire(mboxes[handle].lock);
+	// check that pid is in list of procs using mbox
+	while ( mboxes[handle].procs[i] != pid){
+		if (i == 29){
+			printf("currentpid was not on procs list mboxrecv");
+			exitsim();
+			break;
+		}
+		i++;
+	}
+	if (AQueueLength(&mboxes[handle].msg_queue) == 0){
+		CondHandleWait(mboxes[handle].not_empty);
+		LockHandleAcquire(mboxes[handle].lock);
+	}
+	l = AQueueFirst(&mboxes[handle].msg_queue);
+	inboundmsg = (mbox_message *)AQueueObject(l);
+	if (inboundmsg->length > maxlength){
+		printf("there was an issue with maxlength v message length");
+		return MBOX_FAIL;
+	}
+	bcopy(inboundmsg, message, inboundmsg->length);
+	if (AQueueLength(&mboxes[handle].msg_queue) == MBOX_MAX_BUFFERS_PER_MBOX){
+		CondHandleSignal(mboxes[handle].notfull);
+	}
+	LockHandleRelease(mboxes[handle].lock);
+  	return MBOX_SUCCESS;
 }
 
 //--------------------------------------------------------------------------------
@@ -123,5 +282,27 @@ int MboxRecv(mbox_t handle, int maxlength, void* message) {
 //
 //--------------------------------------------------------------------------------
 int MboxCloseAllByPid(int pid) {
-  return MBOX_FAIL;
+  	int i;
+	int q;
+	int notused = 0;
+	
+	for (i = 0; i < MBOX_NUM_MBOXES; i++){
+		LockHandleAcquire(mboxes[i].lock);
+		for (q = 0; q < 30; q++){
+			if (mboxes[i].procs[q] == pid){
+				mboxes[i].procs[q] = -1;
+				notused++;
+			}
+			else if (mboxes[i].procs[q] == -1){
+				notused++;
+			}
+		}
+		if (notused == 30){ // no one using this mailbox
+			//make mailbox available
+			mboxes[i].inuse == false;
+		}
+		LockHandleRelease(mboxes[i].lock);
+		notused = 0;
+	}	  
+	return MBOX_SUCCESS;
 }
