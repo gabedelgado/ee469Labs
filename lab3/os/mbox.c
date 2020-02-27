@@ -298,7 +298,7 @@ int MboxCloseAllByPid(int pid) {
 		}
 		if (notused == 30){ // no one using this mailbox
 			//make mailbox available
-			mboxes[i].inuse == false;
+			mboxes[i].inuse = false;
 		}
 		LockHandleRelease(mboxes[i].lock);
 		notused = 0;
