@@ -100,7 +100,7 @@ int mboxInit(mbox * m){
 //
 //-------------------------------------------------------
 int MboxOpen(mbox_t handle) {
-	int pid = GetPidFromAddress(currentPCB);
+	int pid = GetCurrentPid();
 	int i = 0;
 	printf("opening mailbox for pid (%d)\n", pid);
 	LockHandleAcquire(mboxes[handle].lock);
@@ -128,7 +128,7 @@ int MboxOpen(mbox_t handle) {
 //
 //-------------------------------------------------------
 int MboxClose(mbox_t handle) {
-	int pid = GetPidFromAddress(currentPCB);
+	int pid = GetCurrentPid();
 	int i = 0;
 	LockHandleAcquire(mboxes[handle].lock);
 	while(mboxes[handle].procs[i] != pid){
@@ -172,7 +172,7 @@ int MboxClose(mbox_t handle) {
 //-------------------------------------------------------
 int MboxSend(mbox_t handle, int length, void* message) {
 	Link * l;
-	int pid = GetPidFromAddress(currentPCB);
+	int pid = GetCurrentPid();
 	int i = 0;
 	uint32 intrval;
 	LockHandleAcquire(mboxes[handle].lock);
@@ -237,7 +237,7 @@ int MboxSend(mbox_t handle, int length, void* message) {
 //-------------------------------------------------------
 int MboxRecv(mbox_t handle, int maxlength, void* message) {
   	Link * l;
-	int pid = GetPidFromAddress(currentPCB);
+	int pid = GetCurrentPid();
 	int i = 0;
 	mbox_message * inboundmsg;
 
