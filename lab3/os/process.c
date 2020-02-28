@@ -114,6 +114,8 @@ void ProcessFreeResources (PCB *pcb) {
   int i = 0;
   int npages = 0;
   int pid = GetCurrentPid();
+  int pidfrompcb = GetPidFromAddress(pcb);
+  printf("freeing resources from pid (%d)", pidfrompcb);
   dbprintf ('p', "ProcessFreeResources: function started\n");
 
 
