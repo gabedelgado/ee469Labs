@@ -106,7 +106,7 @@ int MboxOpen(mbox_t handle) {
 	LockHandleAcquire(mboxes[handle].lock);
 	while(mboxes[handle].procs[i] != -1){i++;}
 	if (i >= 30){
-		printf("ERROR: more than 30 procs using mbox");
+		printf("ERROR: more than 30 procs using mbox\n");
 		exitsim();
 	}
 	mboxes[handle].procs[i] = pid;
@@ -133,7 +133,7 @@ int MboxClose(mbox_t handle) {
 	LockHandleAcquire(mboxes[handle].lock);
 	while(mboxes[handle].procs[i] != pid){
 		if (i == 29){
-			printf("ERROR: could not find pid in procs list for mbox");
+			printf("ERROR: could not find pid in procs list for mbox\n");
 			exitsim();	
 			break;
 		}	
@@ -286,7 +286,7 @@ int MboxCloseAllByPid(int pid) {
   	int i;
 	int q;
 	int notused = 0;
-	printf("closing ALL mbox for pid (%d)", pid);
+	printf("closing ALL mbox for pid (%d)\n", pid);
 	for (i = 0; i < MBOX_NUM_MBOXES; i++){
 		LockHandleAcquire(mboxes[i].lock);
 		for (q = 0; q < 30; q++){
