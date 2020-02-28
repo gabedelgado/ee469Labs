@@ -101,6 +101,7 @@ int mboxInit(mbox * m){
 //-------------------------------------------------------
 int MboxOpen(mbox_t handle) {
 	int pid = GetCurrentPid();
+	printf("opening mailbox for pid (%d)", pid);
 	int i = 0;
 	LockHandleAcquire(mboxes[handle].lock);
 	while(mboxes[handle].procs[i] != -1){i++;}
@@ -178,7 +179,7 @@ int MboxSend(mbox_t handle, int length, void* message) {
 	// check that pid is in list of procs using mbox
 	while ( mboxes[handle].procs[i] != pid){
 		if (i == 29){
-			printf("currentpid was not on procs list");
+			printf("currentpid was not on procs list\n");
 			exitsim();
 			break;
 		}
@@ -244,7 +245,7 @@ int MboxRecv(mbox_t handle, int maxlength, void* message) {
 	// check that pid is in list of procs using mbox
 	while ( mboxes[handle].procs[i] != pid){
 		if (i == 29){
-			printf("currentpid was not on procs list mboxrecv");
+			printf("currentpid was not on procs list mboxrecv\n");
 			exitsim();
 			break;
 		}
@@ -257,7 +258,7 @@ int MboxRecv(mbox_t handle, int maxlength, void* message) {
 	l = AQueueFirst(&mboxes[handle].msg_queue);
 	inboundmsg = (mbox_message *)AQueueObject(l);
 	if (inboundmsg->length > maxlength){
-		printf("there was an issue with maxlength v message length");
+		printf("there was an issue with maxlength v message length\n");
 		return MBOX_FAIL;
 	}
 	bcopy(inboundmsg->buffer, message, inboundmsg->length);
