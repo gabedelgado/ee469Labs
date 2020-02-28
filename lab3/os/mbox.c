@@ -102,7 +102,7 @@ int mboxInit(mbox * m){
 int MboxOpen(mbox_t handle) {
 	int pid = GetPidFromAddress(currentPCB);
 	int i = 0;
-	printf("opening mailbox for pid (%d)", pid);
+	printf("opening mailbox for pid (%d)\n", pid);
 	LockHandleAcquire(mboxes[handle].lock);
 	while(mboxes[handle].procs[i] != -1){i++;}
 	if (i >= 30){
@@ -175,6 +175,8 @@ int MboxSend(mbox_t handle, int length, void* message) {
 	int pid = GetCurrentPid();
 	int i = 0;
 	uint32 intrval;
+	int pcbpid = GetPidFromAddress(currentPCB);
+	printf("current pid from pcb (%d)\n", pcbpid);
 	LockHandleAcquire(mboxes[handle].lock);
 	// check that pid is in list of procs using mbox
 	while ( mboxes[handle].procs[i] != pid){
