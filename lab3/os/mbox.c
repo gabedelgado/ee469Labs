@@ -101,8 +101,8 @@ int mboxInit(mbox * m){
 //-------------------------------------------------------
 int MboxOpen(mbox_t handle) {
 	int pid = GetCurrentPid();
-	printf("opening mailbox for pid (%d)", pid);
 	int i = 0;
+		printf("opening mailbox for pid (%d)", pid);
 	LockHandleAcquire(mboxes[handle].lock);
 	while(mboxes[handle].procs[i] != -1){i++;}
 	if (i >= 30){
