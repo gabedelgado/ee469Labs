@@ -139,7 +139,7 @@ int MboxClose(mbox_t handle) {
 		}	
 		i++;
 	}
-
+	printf("closing mbox for pid (%d)", mboxes[handle].procs[i]);
 	mboxes[handle].procs[i] = -1;
 	i = 0;
 	while (mboxes[handle].procs[i] == -1){
@@ -286,7 +286,7 @@ int MboxCloseAllByPid(int pid) {
   	int i;
 	int q;
 	int notused = 0;
-	
+	printf("closing ALL mbox for pid (%d)", pid);
 	for (i = 0; i < MBOX_NUM_MBOXES; i++){
 		LockHandleAcquire(mboxes[i].lock);
 		for (q = 0; q < 30; q++){
