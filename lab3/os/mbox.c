@@ -282,14 +282,15 @@ int MboxRecv(mbox_t handle, int maxlength, void* message) {
 		printf("in recv, byte %d of message buffer is %c\n", z, inboundmsg->buffer[z]);
 		//printf("still recv, byte %d of message to fill: %c\n", z, *(char *)&message[z]);
 	}
-	for (z = 0; z < inboundmsg->length; z++){
-		printf("still in recv, byte %d of message to fill: %c\n", z, *(char *)&message[z]);
-	}
+
 	
 	//if (AQueueLength(&mboxes[handle].msg_queue) == MBOX_MAX_BUFFERS_PER_MBOX - 1){
 	CondHandleSignal(mboxes[handle].notfull);
 	//}
 	LockHandleRelease(mboxes[handle].lock);
+	for (z = 0; z < inboundmsg->length; z++){
+		printf("still in recv, byte %d of message to fill: %c\n", z, *(char *)&message[z]);
+	}
   	return MBOX_SUCCESS;
 }
 
