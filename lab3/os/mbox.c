@@ -178,7 +178,7 @@ int MboxSend(mbox_t handle, int length, void* message) {
 	LockHandleAcquire(mboxes[handle].lock);
 	// check that pid is in list of procs using mbox
 	while ( mboxes[handle].procs[i] != pid){
-		printf("procs[i] = %d", mboxes[handle].procs[i]);
+		printf("procs[i] = %d ||| currentpid is %d\n", mboxes[handle].procs[i], pid);
 		if (i == 29){
 			printf("currentpid was not on procs list\n");
 			exitsim();
