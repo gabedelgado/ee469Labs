@@ -100,9 +100,9 @@ int mboxInit(mbox * m){
 //
 //-------------------------------------------------------
 int MboxOpen(mbox_t handle) {
-	int pid = GetCurrentPid();
+	int pid = GetPidFromAddress(currentPCB);
 	int i = 0;
-		printf("opening mailbox for pid (%d)", pid);
+	printf("opening mailbox for pid (%d)", pid);
 	LockHandleAcquire(mboxes[handle].lock);
 	while(mboxes[handle].procs[i] != -1){i++;}
 	if (i >= 30){
