@@ -14,7 +14,8 @@
 //--------------------------------------------
 
 typedef struct mbox_message {
-    char buffer[MBOX_MAX_MESSAGE_LENGTH];
+    //char buffer[MBOX_MAX_MESSAGE_LENGTH];
+    void * buffer;
     int length;
     int inuse;
 } mbox_message;
