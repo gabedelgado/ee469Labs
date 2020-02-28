@@ -201,7 +201,7 @@ int MboxSend(mbox_t handle, int length, void* message) {
 	}
 	RestoreIntrs(intrval);
 
-	printf("sending message from pid (%d)", pid);
+	printf("sending message from pid (%d)\n", pid);
 	if (i == MBOX_NUM_BUFFERS) return MBOX_FAIL;
 	bcopy(message, messages[i].buffer, length);
 	messages[i].length = length;
