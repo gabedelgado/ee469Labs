@@ -175,6 +175,9 @@ int MboxSend(mbox_t handle, int length, void* message) {
 	int pid = GetCurrentPid();
 	int i = 0;
 	uint32 intrval;
+	mbox_message * mes;
+	int z;
+	printf("sending to handle %d\n", handle);
 	LockHandleAcquire(mboxes[handle].lock);
 	// check that pid is in list of procs using mbox
 	while ( mboxes[handle].procs[i] != pid){
@@ -189,7 +192,7 @@ int MboxSend(mbox_t handle, int length, void* message) {
 	
 	if (AQueueLength(&mboxes[handle].msg_queue) >= MBOX_MAX_BUFFERS_PER_MBOX){	
 		CondHandleWait(mboxes[handle].notfull);
-		LockHandleAcquire(mboxes[handle].lock);
+		// LockHandleAcquire(mboxes[handle].lock);
 	}
 	
 	intrval = DisableIntrs();
@@ -200,11 +203,18 @@ int MboxSend(mbox_t handle, int length, void* message) {
 		}
 	}
 	RestoreIntrs(intrval);
-
+	mes = &messages[i];
 	printf("sending message from pid (%d)\n", pid);
 	if (i == MBOX_NUM_BUFFERS) return MBOX_FAIL;
-	bcopy(message, messages[i].buffer, length);
+	bcopy((char *)message,mes->buffer, length);
+	for (z = 0; z < length; z++)
+	{
+		//(mes->buffer[z]) = *(char *)&message[z];
+		printf("byte %d of message sent from makeprocs is: %c\n", z, *(char *)&message[z]);
+	}
+	 
 	messages[i].length = length;
+	printf("at send length %d\n", length);
 	if ((l = AQueueAllocLink ((void *)&messages[i])) == NULL) {
       	printf("FATAL ERROR: could not allocate link for message queue in mboxsend!\n");
       	exitsim();
@@ -213,9 +223,9 @@ int MboxSend(mbox_t handle, int length, void* message) {
       	printf("FATAL ERROR: could not insert new link into mbox queue in mboxsend!\n");
       	exitsim();
     }
-	if (AQueueLength(&mboxes[handle].msg_queue) == 1){
-		CondHandleSignal(mboxes[handle].not_empty);
-	}
+	//if (AQueueLength(&mboxes[handle].msg_queue) == 1){
+	CondHandleSignal(mboxes[handle].not_empty);
+	//}
 	LockHandleRelease(mboxes[handle].lock);	
   	return MBOX_SUCCESS;
 }
@@ -228,9 +238,7 @@ int MboxSend(mbox_t handle, int length, void* message) {
 // blocks when there is no message in the buffer.  Maxlength
 // should indicate the maximum number of bytes that can be
 // copied from the buffer into the address of "message".  
-// An error occurs if the message is larger than maxlength.
-// Note that the calling process must have opened the mailbox 
-// via MboxOpen.
+// An error occurs if the message is larger than m(inboundmsg->buffer[i])
 //   
 // Returns MBOX_FAIL on failure.
 // Returns number of bytes written into message on success.
@@ -241,7 +249,9 @@ int MboxRecv(mbox_t handle, int maxlength, void* message) {
 	int pid = GetCurrentPid();
 	int i = 0;
 	mbox_message * inboundmsg;
-
+	int z;
+	char * pointertomsg;
+	printf("receiving from mailbox %d\n", handle);
 	LockHandleAcquire(mboxes[handle].lock);
 	// check that pid is in list of procs using mbox
 	while ( mboxes[handle].procs[i] != pid){
@@ -254,7 +264,7 @@ int MboxRecv(mbox_t handle, int maxlength, void* message) {
 	}
 	if (AQueueLength(&mboxes[handle].msg_queue) == 0){
 		CondHandleWait(mboxes[handle].not_empty);
-		LockHandleAcquire(mboxes[handle].lock);
+		// LockHandleAcquire(mboxes[handle].lock);
 	}
 	l = AQueueFirst(&mboxes[handle].msg_queue);
 	inboundmsg = (mbox_message *)AQueueObject(l);
@@ -262,10 +272,23 @@ int MboxRecv(mbox_t handle, int maxlength, void* message) {
 		printf("there was an issue with maxlength v message length\n");
 		return MBOX_FAIL;
 	}
-	bcopy(inboundmsg->buffer, message, inboundmsg->length);
-	if (AQueueLength(&mboxes[handle].msg_queue) == MBOX_MAX_BUFFERS_PER_MBOX){
-		CondHandleSignal(mboxes[handle].notfull);
+	// printf("message pointer address %p\n", message);
+	// printf("inboundmsg->length: %d\n", inboundmsg->length);
+	bcopy((char *)inboundmsg->buffer, (char *)message, inboundmsg->length);
+	for (z = 0; z < inboundmsg->length; z++)
+	{
+		//pointertomsg = (char *)&message[z];
+		//*pointertomsg = (inboundmsg->buffer[z]);
+		printf("in recv, byte %d of message buffer is %c\n", z, inboundmsg->buffer[z]);
+		//printf("still recv, byte %d of message to fill: %c\n", z, *(char *)&message[z]);
 	}
+	for (z = 0; z < inboundmsg->length; z++){
+		printf("still in recv, byte %d of message to fill: %c\n", z, *(char *)&message[z]);
+	}
+	
+	//if (AQueueLength(&mboxes[handle].msg_queue) == MBOX_MAX_BUFFERS_PER_MBOX - 1){
+	CondHandleSignal(mboxes[handle].notfull);
+	//}
 	LockHandleRelease(mboxes[handle].lock);
   	return MBOX_SUCCESS;
 }

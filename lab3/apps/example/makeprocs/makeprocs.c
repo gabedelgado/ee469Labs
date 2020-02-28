@@ -12,6 +12,7 @@ void main (int argc, char *argv[])
   sem_t s_procs_completed;        // Semaphore used to wait until all spawned processes have completed
   char h_mbox_str[10];            // Used as command-line argument to pass mem_handle to new processes
   char s_procs_completed_str[10]; // Used as command-line argument to pass page_mapped handle to new processes
+  char * mcpointerstart;
 
   if (argc != 2) {
     Printf("Usage: %s <number of processes to create\n", argv[0]);
@@ -44,6 +45,11 @@ void main (int argc, char *argv[])
   // should be equal to the number of processes we're spawning - 1.  Once 
   // each of the processes has signaled, the semaphore should be back to
   // zero and the final sem_wait below will return.
+  mcpointerstart = &mc;
+  for (i = 0; i < sizeof(missile_code); i++){
+    Printf("in makeprocs, byte %d of mc is %c\n",i ,mcpointerstart[i]);
+  }
+  
   if ((s_procs_completed = sem_create(-(numprocs-1))) == SYNC_FAIL) {
     Printf("makeprocs (%d): Bad sem_create\n", getpid());
     Exit();
@@ -69,7 +75,7 @@ void main (int argc, char *argv[])
       Printf("Could not send message to mailbox %d in %s (%d)\n", h_mbox, argv[0], getpid());
       Exit();
     }
-    Printf("makeprocs (%d): Sent message %d\n", getpid(), i);
+    Printf("makeprocs (%d): Sent message %d with size of %d\n", getpid(), i, sizeof(missile_code));
   }
 
   // And finally, wait until all spawned processes have finished.
