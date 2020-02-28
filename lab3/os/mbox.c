@@ -128,7 +128,7 @@ int MboxOpen(mbox_t handle) {
 //
 //-------------------------------------------------------
 int MboxClose(mbox_t handle) {
-	int pid = GetCurrentPid();
+	int pid = GetPidFromAddress(currentPCB);
 	int i = 0;
 	LockHandleAcquire(mboxes[handle].lock);
 	while(mboxes[handle].procs[i] != pid){
@@ -172,11 +172,9 @@ int MboxClose(mbox_t handle) {
 //-------------------------------------------------------
 int MboxSend(mbox_t handle, int length, void* message) {
 	Link * l;
-	int pid = GetCurrentPid();
+	int pid = GetPidFromAddress(currentPCB);
 	int i = 0;
 	uint32 intrval;
-	int pcbpid = GetPidFromAddress(currentPCB);
-	printf("current pid from pcb (%d)\n", pcbpid);
 	LockHandleAcquire(mboxes[handle].lock);
 	// check that pid is in list of procs using mbox
 	while ( mboxes[handle].procs[i] != pid){
@@ -239,7 +237,7 @@ int MboxSend(mbox_t handle, int length, void* message) {
 //-------------------------------------------------------
 int MboxRecv(mbox_t handle, int maxlength, void* message) {
   	Link * l;
-	int pid = GetCurrentPid();
+	int pid = GetPidFromAddress(currentPCB);
 	int i = 0;
 	mbox_message * inboundmsg;
 
