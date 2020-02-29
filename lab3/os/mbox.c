@@ -291,7 +291,7 @@ int MboxRecv(mbox_t handle, int maxlength, void* message) {
 	for (z = 0; z < inboundmsg->length; z++){
 		printf("still in recv, byte %d of message to fill: %c\n", z, *(char *)&message[z]);
 	}
-  	return MBOX_SUCCESS;
+  	return inboundmsg->length;
 }
 
 //--------------------------------------------------------------------------------
