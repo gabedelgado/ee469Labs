@@ -102,7 +102,7 @@ int mboxInit(mbox * m){
 int MboxOpen(mbox_t handle) {
 	int pid = GetCurrentPid();
 	int i = 0;
-	printf("opening mailbox for pid (%d)\n", pid);
+	// printf("opening mailbox for pid (%d)\n", pid);
 	LockHandleAcquire(mboxes[handle].lock);
 	while(mboxes[handle].procs[i] != -1){i++;}
 	if (i >= 30){
@@ -139,7 +139,7 @@ int MboxClose(mbox_t handle) {
 		}	
 		i++;
 	}
-	printf("closing mbox for pid (%d)", mboxes[handle].procs[i]);
+	// printf("closing mbox for pid (%d)", mboxes[handle].procs[i]);
 	mboxes[handle].procs[i] = -1;
 	i = 0;
 	while (mboxes[handle].procs[i] == -1){
@@ -181,7 +181,7 @@ int MboxSend(mbox_t handle, int length, void* message) {
 	LockHandleAcquire(mboxes[handle].lock);
 	// check that pid is in list of procs using mbox
 	while ( mboxes[handle].procs[i] != pid){
-		printf("procs[i] = %d ||| currentpid is %d\n", mboxes[handle].procs[i], pid);
+		// printf("procs[i] = %d ||| currentpid is %d\n", mboxes[handle].procs[i], pid);
 		if (i == 29){
 			printf("currentpid was not on procs list\n");
 			exitsim();
@@ -204,17 +204,17 @@ int MboxSend(mbox_t handle, int length, void* message) {
 	}
 	RestoreIntrs(intrval);
 	mes = &messages[i];
-	printf("sending message from pid (%d)\n", pid);
+	// printf("sending message from pid (%d)\n", pid);
 	if (i == MBOX_NUM_BUFFERS) return MBOX_FAIL;
 	bcopy((char *)message,mes->buffer, length);
-	for (z = 0; z < length; z++)
-	{
-		//(mes->buffer[z]) = *(char *)&message[z];
-		printf("byte %d of message sent from makeprocs is: %c\n", z, *(char *)&message[z]);
-	}
+	// for (z = 0; z < length; z++)
+	// {
+	// 	//(mes->buffer[z]) = *(char *)&message[z];
+	// 	printf("byte %d of message sent from makeprocs is: %c\n", z, *(char *)&message[z]);
+	// }
 	 
 	messages[i].length = length;
-	printf("at send length %d\n", length);
+	// printf("at send length %d\n", length);
 	if ((l = AQueueAllocLink ((void *)&messages[i])) == NULL) {
       	printf("FATAL ERROR: could not allocate link for message queue in mboxsend!\n");
       	exitsim();
@@ -251,7 +251,7 @@ int MboxRecv(mbox_t handle, int maxlength, void* message) {
 	mbox_message * inboundmsg;
 	int z;
 	char * pointertomsg;
-	printf("receiving from mailbox %d\n", handle);
+	// printf("receiving from mailbox %d\n", handle);
 	LockHandleAcquire(mboxes[handle].lock);
 	// check that pid is in list of procs using mbox
 	while ( mboxes[handle].procs[i] != pid){
@@ -275,22 +275,22 @@ int MboxRecv(mbox_t handle, int maxlength, void* message) {
 	// printf("message pointer address %p\n", message);
 	// printf("inboundmsg->length: %d\n", inboundmsg->length);
 	bcopy((char *)inboundmsg->buffer, (char *)message, inboundmsg->length);
-	for (z = 0; z < inboundmsg->length; z++)
-	{
-		//pointertomsg = (char *)&message[z];
-		//*pointertomsg = (inboundmsg->buffer[z]);
-		printf("in recv, byte %d of message buffer is %c\n", z, inboundmsg->buffer[z]);
-		//printf("still recv, byte %d of message to fill: %c\n", z, *(char *)&message[z]);
-	}
+	// for (z = 0; z < inboundmsg->length; z++)
+	// {
+	// 	//pointertomsg = (char *)&message[z];
+	// 	//*pointertomsg = (inboundmsg->buffer[z]);
+	// 	printf("in recv, byte %d of message buffer is %c\n", z, inboundmsg->buffer[z]);
+	// 	//printf("still recv, byte %d of message to fill: %c\n", z, *(char *)&message[z]);
+	// }
 
 	
 	//if (AQueueLength(&mboxes[handle].msg_queue) == MBOX_MAX_BUFFERS_PER_MBOX - 1){
 	CondHandleSignal(mboxes[handle].notfull);
 	//}
 	LockHandleRelease(mboxes[handle].lock);
-	for (z = 0; z < inboundmsg->length; z++){
-		printf("still in recv, byte %d of message to fill: %c\n", z, *(char *)&message[z]);
-	}
+	// for (z = 0; z < inboundmsg->length; z++){
+	// 	printf("still in recv, byte %d of message to fill: %c\n", z, *(char *)&message[z]);
+	// }
   	return inboundmsg->length;
 }
 
@@ -310,7 +310,7 @@ int MboxCloseAllByPid(int pid) {
   	int i;
 	int q;
 	int notused = 0;
-	printf("closing ALL mbox for pid (%d)\n", pid);
+	// printf("closing ALL mbox for pid (%d)\n", pid);
 	for (i = 0; i < MBOX_NUM_MBOXES; i++){
 		LockHandleAcquire(mboxes[i].lock);
 		for (q = 0; q < 30; q++){
