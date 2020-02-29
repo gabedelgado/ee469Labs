@@ -45,10 +45,7 @@ void main (int argc, char *argv[])
   // each of the processes has signaled, the semaphore should be back to
   // zero and the final sem_wait below will return.
   // mcpointerstart = &mc;
-  // for (i = 0; i < sizeof(missile_code); i++){
-  //   Printf("in makeprocs, byte %d of mc is %c\n",i ,mcpointerstart[i]);
-  // }
-  
+
   if ((s_procs_completed = sem_create(-(numprocs-1))) == SYNC_FAIL) {
     Printf("makeprocs (%d): Bad sem_create\n", getpid());
     Exit();

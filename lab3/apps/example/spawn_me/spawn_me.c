@@ -9,7 +9,7 @@ void main (int argc, char *argv[])
   mbox_t h_mbox;           // Handle to the mailbox
   sem_t s_procs_completed; // Semaphore to signal the original process that we're done
   int i;
-  
+
   if (argc != 3) { 
     Printf("Usage: %s <handle_to_mailbox> <handle_to_page_mapped_semaphore>\n"); 
     Exit();
@@ -33,13 +33,7 @@ void main (int argc, char *argv[])
   
   // Now print a message to show that everything worked
   Printf("spawn_me (%d): Received missile code: %c\n", getpid(), mc.really_important_char, mc.numprocs);
-  //Printf(mc.really_important_char);
-  //Printf("\n");
-  //Printf("address of mc in spawnme is %p\n", &mc);
-  // mcpointerstart = &mc;
-  // for (i = 0; i < sizeof(missile_code); i++){
-  //   Printf("in spawnme, byte %d of mc is %c\n",i ,mcpointerstart[i]);
-  // }
+
   // Signal the semaphore to tell the original process that we're done
   if(sem_signal(s_procs_completed) != SYNC_SUCCESS) {
     Printf("spawn_me (%d): Bad semaphore s_procs_completed (%d)!\n", getpid(), s_procs_completed);
