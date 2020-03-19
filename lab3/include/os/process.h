@@ -43,6 +43,18 @@ typedef struct PCB {
   int		npages;		// Number of pages allocated to this process
   Link		*l;		// Used for keeping PCB in queues
 
+  int runtime;
+  int switchedtime;
+  int wakeuptime;
+  int sleeptime;
+  double estcpu;
+  int nQuanta;
+
+  int priority;
+  int fAutowake;
+  int fYield;
+  int fIdle;
+
   int           pinfo;          // Turns on printing of runtime stats
   int           pnice;          // Used in priority calculation
 } PCB;
@@ -71,6 +83,12 @@ typedef struct PCB {
 // Number of jiffies in a single process quantum (i.e. how often ProcessSchedule is called)
 #define PROCESS_QUANTUM_JIFFIES  CLOCK_PROCESS_JIFFIES
 
+#define MIN_PRIORITY 50
+#define MAX_PRIORITY 128
+#define num_PRIORITY_QUEUE 4
+#define N_QUEUES MAX_PRIORITY/num_PRIORITY_QUEUE
+#define N_JIFFIES 11
+
 // Use this format string for printing CPU stats
 #define PROCESS_CPUSTATS_FORMAT "CPUStats: Process %d has run for %d jiffies, prio = %d\n"
 
@@ -90,5 +108,16 @@ int GetPidFromAddress(PCB *pcb);
 
 void ProcessUserSleep(int seconds);
 void ProcessYield();
+
+void ProcessRecalcPriority(PCB * pcb);
+inline int WhichQueue(PCB * pcb);
+void ProcessInsertRunning(PCB * pcb);
+void ProcessDecayEstcpu(PCB * pcb);
+void ProcessDecayEstcpuSleep(PCB * pcb, int time_asleep_jiffies);
+PCB * ProcessFindHighestPriorityPCB();
+void ProcessDecayAllEstcpus();
+void ProcessFixRunQueues();
+int ProcessCountAutowake();
+void ProcessPrintRunQueues();
 
 #endif	/* __process_h__ */

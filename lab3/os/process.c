@@ -27,7 +27,7 @@ static Queue	freepcbs;
 
 // List of processes that are ready to run (ie, not waiting for something
 // to happen).
-static Queue	runQueue;
+static Queue	runQueue[N_QUEUES];
 
 // List of processes that are waiting for something to happen.  There's no
 // reason why this must be a single list; there could be many lists for many
@@ -193,6 +193,51 @@ void ProcessSetResult (PCB * pcb, uint32 result) {
 //	which was saved.
 //
 //----------------------------------------------------------------------
+
+void ProcessRecalcPriority(PCB* pcb){
+  pcb->priority = MIN_PRIORITY + pcb->estcpu/4 + 2*pcb->pnice;
+  if (pcb->priority > 127){
+    pcb->priority = 127;
+  }
+  return;
+}
+
+void ProcessDecayEstcpuSleep(PCB * pcb, int time_asleep_jiffies){
+  int x;
+  int num_sleep;
+  if (time_asleep_jiffies >= 100){
+    num_sleep = time_asleep_jiffies / 100;
+  }
+  for (x=0;x < num_sleep;++x){
+    pcb->estcpu *= 2.0/3.0;
+  }
+  return;
+}
+
+inline int WhichQueue(PCB * pcb){
+  return pcb->priority / num_PRIORITY_QUEUE;
+}
+
+PCB * ProcessFindHighestPriorityPCB(){
+  PCB* pcb;
+  int i;
+
+  for (i = 0; i < N_QUEUES; ++i){
+    if (!AQueueEmpty(&runQueue[i])){
+      pcb = AQueueObject(AQueueFirst(&runQueue[i]));
+      return pcb;
+    }
+  }
+  return NULL;
+}
+
+void ProcessInsertRunning(PCB * pcb){
+  if (AQueueInsertLast(&runQueue[WhichQueue(pcb)],pcb->l) != QUEUE_SUCCESS){
+    printf("Could not insert link in runQueue in ProcessInsertRunning\n");
+    exitsim();
+  }
+}
+
 void ProcessSchedule () {
   PCB *pcb=NULL;
   int i=0;
@@ -239,6 +284,37 @@ void ProcessSchedule () {
     ProcessFreeResources(pcb);
   }
   dbprintf ('p', "Leaving ProcessSchedule (cur=0x%x)\n", (int)currentPCB);
+
+  //Update PCB runtime
+  currentPCB->runtime += ClkGetCurJiffies() - currentPCB->wakeuptime;
+
+  //Print pinfo flag
+  if(currentPCB->pinfo == 1){
+    printf(PROCESS_CPUSTATS_FORMAT, GetCurrentPid(), currentPCB->runtime, currentPCB->priority);
+  }
+
+  //Check if highest priority PCB is Idle
+  pcb = ProcessFindHighestPriorityPCB();
+  if (pcb == idlePCB){
+    pcb->priority = 127;
+
+    // pretty sure we just want to move the idle pcb to the back of the queue, and if it is again the highestpriority pcb, we run the idle process
+    //Remove from Run Queue
+    if (AQueueRemove(&(pcb->l)) !=  QUEUE_SUCCESS){
+      printf("Could not grab queue link when removing from queue");
+      exitsim();
+    }
+    if ((pcb->l = AQueueAllocLink(pcb)) == NULL){
+      printf("Could not get queue link");
+      exitsim();
+    }
+    ProcessInsertRunning(pcb);
+    pcb = ProcessFindHighestPriorityPCB();
+  }
+
+  currentPCB = pcb;
+
+
 }
 
 //----------------------------------------------------------------------
@@ -303,6 +379,13 @@ void ProcessWakeup (PCB *wakeup) {
     printf("FATAL ERROR: could not insert link into runQueue in ProcessWakeup!\n");
     exitsim();
   }
+
+  int time_asleep;
+  time_asleep = ClkGetCurJiffies() - wakeup->wakeuptime;
+  ProcessDecayEstcpuSleep(wakeup,time_asleep);
+  ProcessRecalcPriority(wakeup);
+  ProcessInsertRunning(wakeup);
+
 }
 
 
@@ -414,6 +497,7 @@ int ProcessFork (VoidFunc func, uint32 param, int pnice, int pinfo,char *name, i
   // For system processes, though, all pages must be contiguous.
   // Of course, system processes probably need just a single page for
   // their stack, and don't need any code or data pages allocated for them.
+
   pcb->npages = 1;
   newPage = MemoryAllocPage ();
   if (newPage == 0) {
@@ -547,6 +631,21 @@ int ProcessFork (VoidFunc func, uint32 param, int pnice, int pinfo,char *name, i
     // Mark this as a system process.
     pcb->flags |= PROCESS_TYPE_SYSTEM;
   }
+
+  //Init pcb structure
+  pcb->runtime = 0;
+  pcb->pnice = pnice;
+  pcb->pinfo = pinfo;
+
+  //Init priority
+  if (func == ProcessIdle){
+    pcb->priority = MAX_PRIORITY - 1;
+  }
+  else {
+    pcb->priority = MIN_PRIORITY;
+  }
+  pcb->estcpu = 0;
+
 
   // Place PCB onto run queue
   intrs = DisableIntrs ();
@@ -847,8 +946,6 @@ void main (int argc, char *argv[])
   KbdModuleInit ();
   dbprintf ('i', "After initializing keyboard.\n");
   ClkModuleInit();
-  dbprintf ('i', "After initializing mailboxes.\n");
-  MboxModuleInit();
   for (i = 0; i < 100; i++) {
     buf[i] = 'a';
   }
