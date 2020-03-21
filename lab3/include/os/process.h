@@ -55,8 +55,8 @@ typedef struct PCB {
   int fYield;
   int fIdle;
 
-  int           pinfo;          // Turns on printing of runtime stats
-  int           pnice;          // Used in priority calculation
+  int pinfo;          // Turns on printing of runtime stats
+  int pnice;          // Used in priority calculation
 } PCB;
 
 // Offsets of various registers from the stack pointer in the register
@@ -88,6 +88,8 @@ typedef struct PCB {
 #define num_PRIORITY_QUEUE 4
 #define N_QUEUES MAX_PRIORITY/num_PRIORITY_QUEUE
 #define N_JIFFIES 11
+#define TIME_PER_CPU_WINDOW 10
+#define CPU_WINDOW_BETWEEN_DECAYS 10
 
 // Use this format string for printing CPU stats
 #define PROCESS_CPUSTATS_FORMAT "CPUStats: Process %d has run for %d jiffies, prio = %d\n"
