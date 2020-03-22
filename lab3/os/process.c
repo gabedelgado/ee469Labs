@@ -42,6 +42,10 @@ static Queue	zombieQueue;
 // we can't use malloc() inside the OS.
 static PCB	pcbs[PROCESS_MAX_PROCS];
 
+static int lasttimercount = 0;
+
+static Queue removedQueue;
+
 // String listing debugging options to print out.
 char	debugstr[200];
 
@@ -66,9 +70,10 @@ void ProcessModuleInit () {
 
   dbprintf ('p', "ProcessModuleInit: function started\n");
   AQueueInit (&freepcbs);
-  AQueueInit(&runQueue);
+  AQueueInit(&runQueue); //will probably need to change these to separate inits
   AQueueInit (&waitQueue);
   AQueueInit (&zombieQueue);
+  AQueueInit (&removedQueue);
   // For each PCB slot in the global pcbs array:
   for (i = 0; i < PROCESS_MAX_PROCS; i++) {
     dbprintf ('p', "Initializing PCB %d @ 0x%x.\n", i, (int)&(pcbs[i]));
@@ -171,7 +176,10 @@ void ProcessSetResult (PCB * pcb, uint32 result) {
   pcb->currentSavedFrame[PROCESS_STACK_IREG+1] = result;
 }
 
-
+void ProcessIdle(){
+  while(1);
+}
+
 //----------------------------------------------------------------------
 //
 //	ProcessSchedule
@@ -228,7 +236,7 @@ PCB * ProcessFindHighestPriorityPCB(){
 
   for (i = 0; i < N_QUEUES; ++i){
     if (!AQueueEmpty(&runQueue[i])){
-      pcb = AQueueObject(AQueueFirst(&runQueue[i]));
+      pcb = (PCB *)AQueueObject(AQueueFirst(&runQueue[i]));
       return pcb;
     }
   }
@@ -252,36 +260,99 @@ void ProcessSchedule () {
   PCB *pcb=NULL;
   int i=0;
   Link *l=NULL;
+  int i;
+  Link * linktoremove;
+  PCB * pcbtochange;
+  PCB * pcbtoreturn;
+  int oldpriority;
   
-  //rewriting from scratch from here
-  if (currentPCB->flags & PROCESS_STATUS_RUNNABLE){
-    // then it is on a run queue and has NOT been suspended/sleeping
-    currentPCB->runtime += ClkGetCurJiffies() - currentPCB->switchedtime;
-
-  }
-  else{
-    //it is sleeping and on a waitqueue
-  }
-  
+  dbprintf ('p', "Now entering ProcessSchedule (cur=0x%x, %d ready)\n",
+	    (int)currentPCB, AQueueLength (&runQueue));
   
   if(currentPCB->pinfo == 1){
     printf(PROCESS_CPUSTATS_FORMAT, GetCurrentPid(), currentPCB->runtime, currentPCB->priority);
   }
+    
+  // TODO: check if highestpriorityPCB is idlePCB, then if there is no autoawake process (autoawake from q5), exitsim() everything is done (i think)
 
-  // TODO: check if highest priority PCB is idlePCB
-
-  // Update currentPCB's priority, estcpu, quantacount
-  // HOW CAN WE MAKE SURE THAT 10 PROCESS QUANTA HAVE PASSED??
-  // ALSO IS EVERY PCB IN EVERY RUNQUEUE SUPPOSED TO BE UPDATED EVERY 10 QUANTA?? FROM LAB DOC 
-  // MAYBE MAKE GLOBAL HERE TO COUNT THE QUANTA  (WONT BE EXACT BUT WILL BE CLOSE)
+  if (currentPCB->flags & PROCESS_STATUS_RUNNABLE){ //checking that the pcb is on a run queue
+    // then it is on a run queue and has NOT been suspended/sleeping
+    
+    currentPCB->runtime += ClkGetCurJiffies() - currentPCB->switchedtime;
+    
+    if ((ClkGetCurJiffies() - currentPCB->switchedtime) > 10){ // currentPCB has been running for more than 10 jiffies (one cpu time window)
+      currentPCB->estcpu++;
+      ProcessRecalcPriority(currentPCB);
+      //update currentPCB->nQuanta ?????
+      if(AQueueRemove(&(currentPCB->l)) != QUEUE_SUCCESS){  // remove the currentPCB from its run queue
+        printf("could not remove currently running pcb\n");
+      }
+      ProcessInsertRunning(currentPCB);
+    }
+  }
   
+  //ten process quanta passed, decay estcpu of everything on all runqueues
+  if ((ClkGetCurJiffies - lasttimercount) > 100){
+    lasttimercount = ClkGetCurJiffies();
+    //REMOVE AND RECALC PCBS IN ALL RUN QUEUES, AFTER RECALCED, PUT IN BIG LIST OF PCBs
+    
+    for (i = 0; i < N_QUEUES; i++){
+      while (!AQueueEmpty(&runQueue[i])){
+        
+        // pull link out of queue
+        if (linktoremove = AQueueFirst(&(runQueue[i])) != QUEUE_SUCCESS){
+          printf("could not get first item in run queue, processschedule\n");
+          exitsim();
+        }
 
-  ProcessRecalcPriority(currentPCB);
+        //change link to pcb object
+        pcbtochange = (PCB *)AQueueObject(linktoremove);
 
+        // recalc priority
+        oldpriority = pcbtochange->priority;
+        pcbtochange->estcpu = pcbtochange->estcpu * (2.0/3.0) + pcbtochange->pnice;
+        ProcessRecalcPriority(pcbtochange);
+ 
+        //remove link from queue only if the priority has changed after recalculation
+        if (oldpriority != pcbtochange->priority){
+          if (AQueueRemove(linktoremove) != QUEUE_SUCCESS){
+            printf("could not remove link from queue, processschedule\n");
+          }
+          // put recalculated pcb into removedQueue
+          if ((pcbtochange->l = AQueueAllocLink(pcbtochange)) == NULL){
+            printf("Could not get queue link, 1");
+            exitsim();
+          }
+          if ((AQueueInsertLast(&removedQueue, pcbtochange->l)) != QUEUE_SUCCESS){
+            printf("could not insert into removed queue");
+            exitsim();
+          }
+        }
+      }
+    }
+    // all have been taken out of queues and are ready to put back into runqueues
+
+    // taking everything out of removedqueue and putting back into their proper runqueues
+
+    while(!AQueueEmpty(&removedQueue)){
+      if (linktoremove = AQueueFirst(&removedQueue) != QUEUE_SUCCESS){
+        printf("could not get first item in removed queue, processschedule\n");
+        exitsim();
+      }
+      pcbtoreturn = (PCB *)AQueueObject(linktoremove);
+      if (AQueueRemove(linktoremove) != QUEUE_SUCCESS){
+        printf("could not remove link from queue, processschedule\n");
+      }
+      ProcessInsertRunning(pcbtoreturn); 
+    }
+  }
+  
+  // TODO: wakeup sleeping processes that needs to be woken up (q5) (check wakeuptime flag for pcbs in waitqueue)
+  
   // end rewrite here
 
-  dbprintf ('p', "Now entering ProcessSchedule (cur=0x%x, %d ready)\n",
-	    (int)currentPCB, AQueueLength (&runQueue));
+// TODO: BELOW IS WHERE WE WOULD NEED TO IMPLEMENT THE IDLE PROCESS, INSTEAD OF EXITING SIM, NEED TO RUN IDLE PROCESS ( HOW THOUGH???) (KIND OF EXPLAINED IN LAB DOC)
+  
   // The OS exits if there's no runnable process.  This is a feature, not a
   // bug.  An easy solution to allowing no runnable "user" processes is to
   // have an "idle" process that's simply an infinite loop.
@@ -299,15 +370,19 @@ void ProcessSchedule () {
     printf ("No runnable processes - exiting!\n");
     exitsim ();	// NEVER RETURNS
   }
+// TODO: BETWEEN HERE AND THE OTHER TODO ABOVE (LINE 354) ARE WHERE THE IDLE PROCESS IMPLEMENTATION SHOULD GO
 
-  // Move the front of the queue to the end.  The running process was the one in front.
-  AQueueMoveAfter(&runQueue, AQueueLast(&runQueue), AQueueFirst(&runQueue));
 
-  // Now, run the one at the head of the queue.
-  pcb = (PCB *)AQueueObject(AQueueFirst(&runQueue));
-  currentPCB = pcb;
-  dbprintf ('p',"About to switch to PCB 0x%x,flags=0x%x @ 0x%x\n",
-	    (int)pcb, pcb->flags, (int)(pcb->sysStackPtr[PROCESS_STACK_IAR]));
+  // currentPCB was already moved to end of whatever queue it belongs in, so the following check should never really run unless it was the only running process (which isnt an issue)
+  pcb = ProcessFindHighestPriorityPCB();
+  if (pcb == currentPCB){
+    AQueueRemove(&(currentPCB->l));
+    ProcessInsertRunning(currentPCB);
+    currentPCB = ProcessFindHighestPriorityPCB();
+  }
+  else{
+    currentPCB = pcb;
+  }
 
   // Clean up zombie processes here.  This is done at interrupt time
   // because it can't be done while the process might still be running
@@ -322,36 +397,11 @@ void ProcessSchedule () {
   }
   dbprintf ('p', "Leaving ProcessSchedule (cur=0x%x)\n", (int)currentPCB);
 
-  //Update PCB runtime
-  // WAKEUPTIME IS NEVER UPDATED ANYWHERE
-  currentPCB->runtime += ClkGetCurJiffies() - currentPCB->wakeuptime;
-
   //Print pinfo flag
   if(currentPCB->pinfo == 1){
     printf(PROCESS_CPUSTATS_FORMAT, GetCurrentPid(), currentPCB->runtime, currentPCB->priority);
   }
 
-  //Check if highest priority PCB is Idle
-  pcb = ProcessFindHighestPriorityPCB();
-
-  // if (pcb == idlePCB){
-  //   pcb->priority = 127;
-
-  //   // pretty sure we just want to move the idle pcb to the back of the queue, and if it is again the highestpriority pcb, we run the idle process
-  //   //Remove from Run Queue
-  //   if (AQueueRemove(&(pcb->l)) !=  QUEUE_SUCCESS){
-  //     printf("Could not grab queue link when removing from queue");
-  //     exitsim();
-  //   }
-  //   if ((pcb->l = AQueueAllocLink(pcb)) == NULL){
-  //     printf("Could not get queue link");
-  //     exitsim();
-  //   }
-  //   ProcessInsertRunning(pcb);
-  //   pcb = ProcessFindHighestPriorityPCB();
-  // }
-
-  currentPCB = pcb;
   currentPCB->switchedtime = ClkGetCurJiffies();
 
 
@@ -421,7 +471,6 @@ void ProcessWakeup (PCB *wakeup) {
   
   
   time_asleep = ClkGetCurJiffies() - wakeup->sleeptime;
-  wakeup->wakeuptime = ClkGetCurJiffies();
   ProcessDecayEstcpuSleep(wakeup,time_asleep);
   ProcessRecalcPriority(wakeup);
   
@@ -1103,6 +1152,8 @@ int GetPidFromAddress(PCB *pcb) {
 //--------------------------------------------------------
 void ProcessUserSleep(int seconds) {
   // Your code here
+  // this is where we would setup pcb->wakeuptime field (time we need this process to be wokenup)
+  // process schedule would be called right after and changed the currentPCB to something on a runqueue
 }
 
 //-----------------------------------------------------
@@ -1112,4 +1163,6 @@ void ProcessUserSleep(int seconds) {
 //-----------------------------------------------------
 void ProcessYield() {
   // Your code here
+  // change currentPCB fYield to true
+  // then processschedule() should check if the yield flag is set, move the currentPCB to the end of its queue, change current PCB to new highest priority pcb 
 }
