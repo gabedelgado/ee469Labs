@@ -212,8 +212,10 @@ void ProcessRecalcPriority(PCB* pcb){
   if (pcb->priority > 127){
     pcb->priority = 127;
   }
-  
-
+  if (pcb == idlePCB){
+    printf("idlePCB not recalced\n");
+    pcb->priority = 127;
+  }
   return;
 }
 
