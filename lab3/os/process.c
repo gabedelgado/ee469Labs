@@ -305,13 +305,10 @@ void ProcessSchedule () {
     
     for (i = 0; i < N_QUEUES; i++){
       printf("here1\n");
-      while (!AQueueEmpty(&runQueue[i])){
+      linktoremove = AQueueFirst(&runQueue[i]);
+      while (linktoremove != NULL){
         
         // pull link out of queue
-        if ((linktoremove = AQueueFirst(&(runQueue[i]))) == NULL){
-          printf("could not get first item in run queue, processschedule\n");
-          exitsim();
-        }
         printf("here 6\n");
         //change link to pcb object
         pcbtochange = (PCB *)AQueueObject(linktoremove);
@@ -337,6 +334,7 @@ void ProcessSchedule () {
           }
         }
         printf("here 8\n");
+        linktoremove = AQueueNext(linktoremove);
       }
     }
     // all have been taken out of queues and are ready to put back into runqueues
