@@ -303,7 +303,7 @@ void ProcessSchedule () {
   if ((ClkGetCurJiffies() - lasttimercount) > 100){
     
     //REMOVE AND RECALC PCBS IN ALL RUN QUEUES, AFTER RECALCED, PUT IN BIG LIST OF PCBs
-    
+    printf("current pid: %d", GetCurrentPid());
     for (i = 0; i < N_QUEUES; i++){
       
       linktoremove = AQueueFirst(&runQueue[i]);
