@@ -122,7 +122,7 @@ void ProcessSetStatus (PCB *pcb, int status) {
 void ProcessFreeResources (PCB *pcb) {
   int i = 0;
   int npages = 0;
-  int pid = GetCurrentPid();
+  // int pid = GetCurrentPid();
   int pidfrompcb = GetPidFromAddress(pcb);
   dbprintf ('p', "ProcessFreeResources: function started\n");
 
@@ -251,7 +251,7 @@ PCB * ProcessFindHighestPriorityPCB(){
 void ProcessInsertRunning(PCB * pcb){
   //ASSUMES THAT THE PCB SENT IN HAS ALREADY BEEN REMOVED FROM ITS PROPER QUEUE
 
-  if (pcb->l = AQueueAllocLink(pcb) != QUEUE_SUCCESS){
+  if ((pcb->l = AQueueAllocLink(pcb)) == NULL){
     printf("could not allocate link in ProcessInsertRunning.\n");
     exitsim();
   }
@@ -265,14 +265,13 @@ void ProcessSchedule () {
   PCB *pcb=NULL;
   int i=0;
   Link *l=NULL;
-  int i;
   Link * linktoremove;
   PCB * pcbtochange;
   PCB * pcbtoreturn;
   int oldpriority;
   
   dbprintf ('p', "Now entering ProcessSchedule (cur=0x%x, %d ready)\n",
-	    (int)currentPCB, AQueueLength (&runQueue));
+	    (int)currentPCB, 0);
   
   if(currentPCB->pinfo == 1){
     printf(PROCESS_CPUSTATS_FORMAT, GetCurrentPid(), currentPCB->runtime, currentPCB->priority);
@@ -307,7 +306,7 @@ void ProcessSchedule () {
       while (!AQueueEmpty(&runQueue[i])){
         
         // pull link out of queue
-        if (linktoremove = AQueueFirst(&(runQueue[i])) != QUEUE_SUCCESS){
+        if ((linktoremove = AQueueFirst(&(runQueue[i]))) == NULL){
           printf("could not get first item in run queue, processschedule\n");
           exitsim();
         }
