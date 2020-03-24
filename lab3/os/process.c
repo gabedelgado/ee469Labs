@@ -304,12 +304,12 @@ void ProcessSchedule () {
     //REMOVE AND RECALC PCBS IN ALL RUN QUEUES, AFTER RECALCED, PUT IN BIG LIST OF PCBs
     
     for (i = 0; i < N_QUEUES; i++){
-      printf("here1\n");
+      
       linktoremove = AQueueFirst(&runQueue[i]);
       while (linktoremove != NULL){
         
         // pull link out of queue
-        printf("here 6\n");
+        
         //change link to pcb object
         pcbtochange = (PCB *)AQueueObject(linktoremove);
 
@@ -317,7 +317,7 @@ void ProcessSchedule () {
         oldpriority = pcbtochange->priority;
         pcbtochange->estcpu = pcbtochange->estcpu * (2.0/3.0) + pcbtochange->pnice;
         ProcessRecalcPriority(pcbtochange);
-         printf("here 7\n");
+        
         //remove link from queue only if the priority has changed after recalculation
         if (oldpriority != pcbtochange->priority){
           if (AQueueRemove(&linktoremove) != QUEUE_SUCCESS){
@@ -333,7 +333,6 @@ void ProcessSchedule () {
             exitsim();
           }
         }
-        printf("here 8\n");
         linktoremove = AQueueNext(linktoremove);
       }
     }
@@ -354,7 +353,7 @@ void ProcessSchedule () {
     }
     lasttimercount = ClkGetCurJiffies();
   }
-  printf("here2\n");
+
   // wakeup sleeping processes that needs to be woken up (q5) (check wakeuptime flag for pcbs in waitqueue)
   if (!AQueueEmpty(&waitQueue)) {
       l = AQueueFirst(&waitQueue);
@@ -364,7 +363,7 @@ void ProcessSchedule () {
         if(pcb->fAutowake == 1){ProcessWakeup(pcb);}
       }
   }
-  printf("here3\n");
+  
   // TODO: BELOW IS WHERE WE WOULD NEED TO IMPLEMENT THE IDLE PROCESS, INSTEAD OF EXITING SIM, NEED TO RUN IDLE PROCESS ( HOW THOUGH???) (KIND OF EXPLAINED IN LAB DOC)
   
   // The OS exits if there's no runnable process.  This is a feature, not a
@@ -394,7 +393,7 @@ void ProcessSchedule () {
       currentPCB = pcb;
     }
   }
-  printf("here4\n");
+
   // Clean up zombie processes here.  This is done at interrupt time
   // because it can't be done while the process might still be running
   while (!AQueueEmpty(&zombieQueue)) {
@@ -412,7 +411,7 @@ void ProcessSchedule () {
   if(currentPCB->pinfo == 1){
     printf(PROCESS_CPUSTATS_FORMAT, GetCurrentPid(), currentPCB->runtime, currentPCB->priority);
   }
-  printf("here5\n");
+
   currentPCB->switchedtime = ClkGetCurJiffies();
 }
 
