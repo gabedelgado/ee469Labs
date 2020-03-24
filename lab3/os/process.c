@@ -378,8 +378,8 @@ void ProcessSchedule () {
   pcb = ProcessFindHighestPriorityPCB();
   if (pcb == currentPCB){
     //printf("hit the line i didnt think would hit \n");
-    AQueueRemove(&(currentPCB->l));
-    ProcessInsertRunning(currentPCB);
+    AQueueRemove(&(pcb->l));
+    ProcessInsertRunning(pcb);
     pcb = ProcessFindHighestPriorityPCB();
   }
   
