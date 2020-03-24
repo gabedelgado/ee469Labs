@@ -408,11 +408,6 @@ void ProcessSchedule () {
   }
   dbprintf ('p', "Leaving ProcessSchedule (cur=0x%x)\n", (int)currentPCB);
 
-  //Print pinfo flag
-  if(currentPCB->pinfo == 1){
-    printf(PROCESS_CPUSTATS_FORMAT, GetCurrentPid(), currentPCB->runtime, currentPCB->priority);
-  }
-
   currentPCB->switchedtime = ClkGetCurJiffies();
 }
 
