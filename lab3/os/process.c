@@ -227,6 +227,8 @@ void ProcessDecayEstcpuSleep(PCB * pcb, int time_asleep_jiffies){
   for (x=0; x < num_sleep; ++x){
     twothirds *= 2.0/3.0;
   }
+  printf("2/3 ^ %d = ", num_sleep);
+  printf("%f", twothirds);
   pcb->estcpu *= twothirds;
   ProcessRecalcPriority(pcb);
   return;
