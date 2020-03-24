@@ -77,7 +77,7 @@ void ProcessModuleInit () {
   AQueueInit (&waitQueue);
   AQueueInit (&zombieQueue);
   AQueueInit (&removedQueue);
-  idlePCB = &pcbs[ProcessFork((VoidFunc)&ProcessIdle, 0, 0, 0, "", 0)];
+  
   // For each PCB slot in the global pcbs array:
   for (i = 0; i < PROCESS_MAX_PROCS; i++) {
     dbprintf ('p', "Initializing PCB %d @ 0x%x.\n", i, (int)&(pcbs[i]));
@@ -96,6 +96,7 @@ void ProcessModuleInit () {
   }
   // There are no processes running at this point, so currentPCB=NULL
   currentPCB = NULL;
+  idlePCB = &pcbs[ProcessFork((VoidFunc)&ProcessIdle, 0, 0, 0, "", 0)];
   dbprintf ('p', "ProcessModuleInit: function complete\n");
 }
 
