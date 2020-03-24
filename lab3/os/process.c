@@ -377,25 +377,19 @@ void ProcessSchedule () {
   // currentPCB was already moved to end of whatever queue it belongs in, so the following check should never really run unless it was the only running process (which isnt an issue)
   pcb = ProcessFindHighestPriorityPCB();
   if (pcb == currentPCB){
-    printf("hit the line i didnt think would hit \n");
+    //printf("hit the line i didnt think would hit \n");
     AQueueRemove(&(currentPCB->l));
     ProcessInsertRunning(currentPCB);
-    currentPCB = ProcessFindHighestPriorityPCB();
+    pcb = ProcessFindHighestPriorityPCB();
   }
-  else{
-    currentPCB = pcb;
-  }
-
+  
   if (pcb == idlePCB){
     AQueueRemove(&(pcb->l));
     ProcessInsertRunning(pcb);
     pcb = ProcessFindHighestPriorityPCB();
-    if(pcb == idlePCB){
-     // printf("picking idlepcb\n");
-      currentPCB = pcb;
-    }
   }
 
+  currentPCB = pcb;
   // Clean up zombie processes here.  This is done at interrupt time
   // because it can't be done while the process might still be running
   while (!AQueueEmpty(&zombieQueue)) {
