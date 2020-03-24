@@ -463,8 +463,8 @@ void ProcessWakeup (PCB *wakeup) {
   int time_asleep;
   dbprintf ('p',"Waking up PID %d.\n", (int)(wakeup - pcbs));
   // Make sure it's not yet a runnable process.
-  ASSERT (wakeup->flags & PROCESS_STATUS_WAITING, "Trying to wake up a non-sleeping process!\n");
-  ProcessSetStatus (wakeup, PROCESS_STATUS_RUNNABLE);
+  ASSERT(wakeup->flags & PROCESS_STATUS_WAITING, "Trying to wake up a non-sleeping process!\n");
+  ProcessSetStatus(wakeup, PROCESS_STATUS_RUNNABLE);
 
   // REMOVE FROM WAKEUP QUEUE
   if (AQueueRemove(&(wakeup->l)) != QUEUE_SUCCESS) {

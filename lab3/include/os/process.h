@@ -122,5 +122,6 @@ void ProcessFixRunQueues();
 int ProcessCountAutowake();
 void ProcessPrintRunQueues();
 void ProcessIdle();
+void ProcessSetStatus (PCB *pcb, int status);
 
 #endif	/* __process_h__ */
