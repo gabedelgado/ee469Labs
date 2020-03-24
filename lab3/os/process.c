@@ -298,7 +298,7 @@ void ProcessSchedule () {
   }
   
   //ten process quanta passed, decay estcpu of everything on all runqueues
-  if ((ClkGetCurJiffies - lasttimercount) > 100){
+  if ((ClkGetCurJiffies() - lasttimercount) > 100){
     
     //REMOVE AND RECALC PCBS IN ALL RUN QUEUES, AFTER RECALCED, PUT IN BIG LIST OF PCBs
     
@@ -321,7 +321,7 @@ void ProcessSchedule () {
  
         //remove link from queue only if the priority has changed after recalculation
         if (oldpriority != pcbtochange->priority){
-          if (AQueueRemove(linktoremove) != QUEUE_SUCCESS){
+          if (AQueueRemove(&linktoremove) != QUEUE_SUCCESS){
             printf("could not remove link from queue, processschedule\n");
           }
           // put recalculated pcb into removedQueue
@@ -341,12 +341,12 @@ void ProcessSchedule () {
     // taking everything out of removedqueue and putting back into their proper runqueues
 
     while(!AQueueEmpty(&removedQueue)){
-      if (linktoremove = AQueueFirst(&removedQueue) != QUEUE_SUCCESS){
+      if (linktoremove = AQueueFirst(&removedQueue) == NULL){
         printf("could not get first item in removed queue, processschedule\n");
         exitsim();
       }
       pcbtoreturn = (PCB *)AQueueObject(linktoremove);
-      if (AQueueRemove(linktoremove) != QUEUE_SUCCESS){
+      if (AQueueRemove(&linktoremove) != QUEUE_SUCCESS){
         printf("could not remove link from queue, processschedule\n");
       }
       ProcessInsertRunning(pcbtoreturn); 
