@@ -1167,10 +1167,11 @@ void ProcessPrintQueues(){
   PCB * pcb;
   for (i = 0; i < 32; i++){
     if (!AQueueEmpty(&runQueue[i])){
+      printf("runQueue[%d]", i);
       l = AQueueFirst(&runQueue[i]);
       while (l != NULL){
         pcb = (PCB *)AQueueObject(l);
-        printf(" | PID: %d | ", GetPidFromAddress(pcb));
+        printf(" | PID: %d, prio: %d | ", GetPidFromAddress(pcb), pcb->priority);
         l = AQueueNext(l);
       }
       printf("\n");
