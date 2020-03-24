@@ -303,7 +303,7 @@ void ProcessSchedule () {
   if ((ClkGetCurJiffies() - lasttimercount) > 100){
     
     //REMOVE AND RECALC PCBS IN ALL RUN QUEUES, AFTER RECALCED, PUT IN BIG LIST OF PCBs
-    printf("current pid: %d\n", GetCurrentPid());
+    ProcessPrintQueues();
     for (i = 0; i < N_QUEUES; i++){
       
       linktoremove = AQueueFirst(&runQueue[i]);
@@ -1145,7 +1145,6 @@ void ProcessUserSleep(int seconds) {
   currentPCB->fAutowake = 1;
   currentPCB->wakeuptime = ClkGetCurJiffies() + seconds * 1000;
   currentPCB->sleeptime = ClkGetCurJiffies();
-  ProcessSchedule();
   // this is where we would setup pcb->wakeuptime field (time we need this process to be wokenup)
   // process schedule would be called right after and changed the currentPCB to something on a runqueue
 }
@@ -1159,6 +1158,22 @@ void ProcessYield() {
   // Your code here
   // change currentPCB fYield to true
   currentPCB->fYield = 1;
-  ProcessSchedule();
   // then processschedule() should check if the yield flag is set, move the currentPCB to the end of its queue, change current PCB to new highest priority pcb 
+}
+
+void ProcessPrintQueues(){
+  int i = 0;
+  Link * l;
+  PCB * pcb;
+  for (i = 0; i < 32; i++){
+    if (!AQueueEmpty(&runQueue[i])){
+      l = AQueueFirst(&runQueue[i]);
+      while (l != NULL){
+        pcb = (PCB *)AQueueObject(l);
+        printf(" | PID: %d | ", GetPidFromAddress(pcb));
+        l = AQueueNext(l);
+      }
+      printf("\n");
+    }
+  }
 }
