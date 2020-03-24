@@ -275,6 +275,8 @@ void ProcessSchedule () {
     
   // TODO: check if highestpriorityPCB is idlePCB, then if there is no autoawake process (autoawake from q5), exitsim() everything is done (i think)
 
+  
+
   if (currentPCB->flags & PROCESS_STATUS_RUNNABLE){ //checking that the pcb is on a run queue
     // then it is on a run queue and has NOT been suspended/sleeping
     
@@ -1152,6 +1154,10 @@ int GetPidFromAddress(PCB *pcb) {
 //--------------------------------------------------------
 void ProcessUserSleep(int seconds) {
   // Your code here
+  currentPCB->fAutowake = 1;
+  currentPCB->wakeuptime = seconds * 1000;
+  currentPCB->sleeptime = ClkGetCurJiffies();
+  ProcessSchedule();
   // this is where we would setup pcb->wakeuptime field (time we need this process to be wokenup)
   // process schedule would be called right after and changed the currentPCB to something on a runqueue
 }
@@ -1164,5 +1170,7 @@ void ProcessUserSleep(int seconds) {
 void ProcessYield() {
   // Your code here
   // change currentPCB fYield to true
+  currentPCB->fYield = 1;
+  ProcessSchedule();
   // then processschedule() should check if the yield flag is set, move the currentPCB to the end of its queue, change current PCB to new highest priority pcb 
 }
