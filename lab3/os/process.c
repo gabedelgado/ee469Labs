@@ -729,16 +729,15 @@ int ProcessFork (VoidFunc func, uint32 param, int pnice, int pinfo,char *name, i
   pcb->runtime = 0;
   pcb->pnice = pnice;
   pcb->pinfo = pinfo;
-
+  pcb->estcpu = 0;
   //Init priority
   // we need to figure out how to make this idle process and a pcb for it
   if (func == (VoidFunc)&ProcessIdle){
     pcb->priority = MAX_PRIORITY - 1;
   }
   else {
-    pcb->priority = MIN_PRIORITY;
+    ProcessRecalcPriority(pcb);
   }
-  pcb->estcpu = 0;
 
 
   // Place PCB onto run queue
