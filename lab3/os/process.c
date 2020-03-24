@@ -341,7 +341,7 @@ void ProcessSchedule () {
     // taking everything out of removedqueue and putting back into their proper runqueues
 
     while(!AQueueEmpty(&removedQueue)){
-      if (linktoremove = AQueueFirst(&removedQueue) == NULL){
+      if ((linktoremove = AQueueFirst(&removedQueue)) == NULL){
         printf("could not get first item in removed queue, processschedule\n");
         exitsim();
       }
