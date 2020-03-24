@@ -213,7 +213,6 @@ void ProcessRecalcPriority(PCB* pcb){
     pcb->priority = 127;
   }
   if (pcb == idlePCB){
-    printf("idlePCB not recalced\n");
     pcb->priority = 127;
   }
   return;
@@ -229,8 +228,6 @@ void ProcessDecayEstcpuSleep(PCB * pcb, int time_asleep_jiffies){
   for (x=0; x < num_sleep; ++x){
     twothirds *= 2.0/3.0;
   }
-  printf("2/3 ^ %d = ", num_sleep);
-  printf("%f", twothirds);
   pcb->estcpu *= twothirds;
   ProcessRecalcPriority(pcb);
   return;
@@ -393,7 +390,7 @@ void ProcessSchedule () {
     ProcessInsertRunning(pcb);
     pcb = ProcessFindHighestPriorityPCB();
     if(pcb == idlePCB){
-      //printf("picking idlepcb\n");
+      printf("picking idlepcb\n");
       currentPCB = pcb;
     }
   }
