@@ -178,7 +178,6 @@ int MboxSend(mbox_t handle, int length, void* message) {
 	int i = 0;
 	uint32 intrval;
 	mbox_message * mes;
-	int z;
 	
 	LockHandleAcquire(mboxes[handle].lock);
 	
