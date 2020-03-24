@@ -312,7 +312,7 @@ void ProcessSchedule () {
           printf("could not get first item in run queue, processschedule\n");
           exitsim();
         }
-
+        printf("here 6\n");
         //change link to pcb object
         pcbtochange = (PCB *)AQueueObject(linktoremove);
 
@@ -320,7 +320,7 @@ void ProcessSchedule () {
         oldpriority = pcbtochange->priority;
         pcbtochange->estcpu = pcbtochange->estcpu * (2.0/3.0) + pcbtochange->pnice;
         ProcessRecalcPriority(pcbtochange);
- 
+         printf("here 7\n");
         //remove link from queue only if the priority has changed after recalculation
         if (oldpriority != pcbtochange->priority){
           if (AQueueRemove(&linktoremove) != QUEUE_SUCCESS){
@@ -336,6 +336,7 @@ void ProcessSchedule () {
             exitsim();
           }
         }
+        printf("here 8\n");
       }
     }
     // all have been taken out of queues and are ready to put back into runqueues
