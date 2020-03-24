@@ -46,6 +46,7 @@ static int lasttimercount = 0;
 
 static Queue removedQueue;
 
+PCB * idlePCB; 
 // String listing debugging options to print out.
 char	debugstr[200];
 
@@ -67,13 +68,16 @@ uint32 get_argument(char *string);
 //----------------------------------------------------------------------
 void ProcessModuleInit () {
   int		i;
-
+  
   dbprintf ('p', "ProcessModuleInit: function started\n");
   AQueueInit (&freepcbs);
-  AQueueInit(&runQueue); //will probably need to change these to separate inits
+  for (i = 0; i < 32; i++){
+    AQueueInit(&runQueue[i]);
+  }
   AQueueInit (&waitQueue);
   AQueueInit (&zombieQueue);
   AQueueInit (&removedQueue);
+  idlePCB = &pcbs[ProcessFork((VoidFunc)&ProcessIdle, 0, 0, 0, "", 0)];
   // For each PCB slot in the global pcbs array:
   for (i = 0; i < PROCESS_MAX_PROCS; i++) {
     dbprintf ('p', "Initializing PCB %d @ 0x%x.\n", i, (int)&(pcbs[i]));
@@ -207,6 +211,7 @@ void ProcessRecalcPriority(PCB* pcb){
   if (pcb->priority > 127){
     pcb->priority = 127;
   }
+  
 
   return;
 }
@@ -295,7 +300,7 @@ void ProcessSchedule () {
   
   //ten process quanta passed, decay estcpu of everything on all runqueues
   if ((ClkGetCurJiffies - lasttimercount) > 100){
-    lasttimercount = ClkGetCurJiffies();
+    
     //REMOVE AND RECALC PCBS IN ALL RUN QUEUES, AFTER RECALCED, PUT IN BIG LIST OF PCBs
     
     for (i = 0; i < N_QUEUES; i++){
@@ -347,31 +352,24 @@ void ProcessSchedule () {
       }
       ProcessInsertRunning(pcbtoreturn); 
     }
+    lasttimercount = ClkGetCurJiffies();
   }
   
-  // TODO: wakeup sleeping processes that needs to be woken up (q5) (check wakeuptime flag for pcbs in waitqueue)
-  
-  // end rewrite here
+  // wakeup sleeping processes that needs to be woken up (q5) (check wakeuptime flag for pcbs in waitqueue)
+  if (!AQueueEmpty(&waitQueue)) {
+      l = AQueueFirst(&waitQueue);
+      while (l != NULL) {
+        pcb = AQueueObject(l);
+        l = AQueueNext(l);
+        if(pcb->fAutowake == 1){ProcessWakeup(pcb);}
+      }
 
-// TODO: BELOW IS WHERE WE WOULD NEED TO IMPLEMENT THE IDLE PROCESS, INSTEAD OF EXITING SIM, NEED TO RUN IDLE PROCESS ( HOW THOUGH???) (KIND OF EXPLAINED IN LAB DOC)
+  // TODO: BELOW IS WHERE WE WOULD NEED TO IMPLEMENT THE IDLE PROCESS, INSTEAD OF EXITING SIM, NEED TO RUN IDLE PROCESS ( HOW THOUGH???) (KIND OF EXPLAINED IN LAB DOC)
   
   // The OS exits if there's no runnable process.  This is a feature, not a
   // bug.  An easy solution to allowing no runnable "user" processes is to
   // have an "idle" process that's simply an infinite loop.
-  if (AQueueEmpty(&runQueue)) {
-    if (!AQueueEmpty(&waitQueue)) {
-      printf("FATAL ERROR: no runnable processes, but there are sleeping processes waiting!\n");
-      l = AQueueFirst(&waitQueue);
-      while (l != NULL) {
-        pcb = AQueueObject(l);
-        printf("Sleeping process %d: ", i++); printf("PID = %d\n", (int)(pcb - pcbs));
-        l = AQueueNext(l);
-      }
-      exitsim();
-    }
-    printf ("No runnable processes - exiting!\n");
-    exitsim ();	// NEVER RETURNS
-  }
+
 // TODO: BETWEEN HERE AND THE OTHER TODO ABOVE (LINE 354) ARE WHERE THE IDLE PROCESS IMPLEMENTATION SHOULD GO
 
 
@@ -384,6 +382,15 @@ void ProcessSchedule () {
   }
   else{
     currentPCB = pcb;
+  }
+
+  if (pcb == idlePCB){
+    AQueueRemove(&(pcb->l));
+    ProcessInsertRunning(pcb);
+    pcb = ProcessFindHighestPriorityPCB();
+    if(pcb == idlePCB){
+      currentPCB = pcb;
+    }
   }
 
   // Clean up zombie processes here.  This is done at interrupt time
@@ -405,8 +412,6 @@ void ProcessSchedule () {
   }
 
   currentPCB->switchedtime = ClkGetCurJiffies();
-
-
 }
 
 //----------------------------------------------------------------------
@@ -524,7 +529,6 @@ void ProcessDestroy (PCB *pcb) {
 static void ProcessExit () {
   exit ();
 }
-
 
 //----------------------------------------------------------------------
 //
@@ -731,7 +735,7 @@ int ProcessFork (VoidFunc func, uint32 param, int pnice, int pinfo,char *name, i
 
   //Init priority
   // we need to figure out how to make this idle process and a pcb for it
-  if (func == ProcessIdle){
+  if (func == (VoidFunc)&ProcessIdle){
     pcb->priority = MAX_PRIORITY - 1;
   }
   else {
@@ -742,14 +746,7 @@ int ProcessFork (VoidFunc func, uint32 param, int pnice, int pinfo,char *name, i
 
   // Place PCB onto run queue
   intrs = DisableIntrs ();
-  if ((pcb->l = AQueueAllocLink(pcb)) == NULL) {
-    printf("FATAL ERROR: could not get link for forked PCB in ProcessFork!\n");
-    exitsim();
-  }
-  if (AQueueInsertLast(&runQueue, pcb->l) != QUEUE_SUCCESS) {
-    printf("FATAL ERROR: could not insert link into runQueue in ProcessFork!\n");
-    exitsim();
-  }
+  ProcessInsertRunning(pcb);
   RestoreIntrs (intrs);
 
   // If this is the first process, make it the current one
@@ -1155,7 +1152,7 @@ int GetPidFromAddress(PCB *pcb) {
 void ProcessUserSleep(int seconds) {
   // Your code here
   currentPCB->fAutowake = 1;
-  currentPCB->wakeuptime = seconds * 1000;
+  currentPCB->wakeuptime = ClkGetCurJiffies() + seconds * 1000;
   currentPCB->sleeptime = ClkGetCurJiffies();
   ProcessSchedule();
   // this is where we would setup pcb->wakeuptime field (time we need this process to be wokenup)
