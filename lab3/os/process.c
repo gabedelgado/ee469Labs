@@ -390,7 +390,7 @@ void ProcessSchedule () {
     ProcessInsertRunning(pcb);
     pcb = ProcessFindHighestPriorityPCB();
     if(pcb == idlePCB){
-      printf("picking idlepcb\n");
+     // printf("picking idlepcb\n");
       currentPCB = pcb;
     }
   }
