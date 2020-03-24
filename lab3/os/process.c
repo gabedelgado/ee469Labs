@@ -362,7 +362,7 @@ void ProcessSchedule () {
         l = AQueueNext(l);
         if(pcb->fAutowake == 1){ProcessWakeup(pcb);}
       }
-
+  }
   // TODO: BELOW IS WHERE WE WOULD NEED TO IMPLEMENT THE IDLE PROCESS, INSTEAD OF EXITING SIM, NEED TO RUN IDLE PROCESS ( HOW THOUGH???) (KIND OF EXPLAINED IN LAB DOC)
   
   // The OS exits if there's no runnable process.  This is a feature, not a
