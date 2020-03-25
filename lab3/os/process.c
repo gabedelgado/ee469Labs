@@ -394,20 +394,23 @@ void ProcessSchedule () {
     pcb = ProcessFindHighestPriorityPCB();
   }
   autoawakethere = 0;
-  if((pcb == idlePCB) && !AQueueEmpty(&waitQueue)){
-    l = AQueueFirst(&waitQueue);
-    while(l != NULL){
-      checkautowakepcb = (PCB *)AQueueObject(l);
-      if (checkautowakepcb->fAutowake == 1){
-        autoawakethere = 1;
+  if((pcb == idlePCB)){
+    if (!AQueueEmpty(&waitQueue)){
+      l = AQueueFirst(&waitQueue);
+      while(l != NULL){
+        checkautowakepcb = (PCB *)AQueueObject(l);
+        if (checkautowakepcb->fAutowake == 1){
+          autoawakethere = 1;
+        }
+        l = AQueueNext(l);
       }
-      l = AQueueNext(l);
     }
     if(!autoawakethere){
       printf("Nothing left to run, exiting sim.\n");
       exitsim();
     }
   }
+  
 
   currentPCB = pcb;
   // Clean up zombie processes here.  This is done at interrupt time
