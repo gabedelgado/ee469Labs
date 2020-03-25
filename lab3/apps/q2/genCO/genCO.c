@@ -6,7 +6,7 @@ void main(int argc, char * argv[]){
     sem_t s_procs_completed;
     mbox_t mbox_CO;
     int message = 1;
-    Printf("got here at least 2\n");
+    //Printf("got here at least 2\n");
     s_procs_completed = dstrtol(argv[2], NULL, 10);
     mbox_CO = dstrtol(argv[1], NULL, 10);
 
