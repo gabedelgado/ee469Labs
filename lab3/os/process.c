@@ -369,6 +369,7 @@ void ProcessSchedule () {
   
   // TODO: BELOW IS WHERE WE WOULD NEED TO IMPLEMENT THE IDLE PROCESS, INSTEAD OF EXITING SIM, NEED TO RUN IDLE PROCESS ( HOW THOUGH???) (KIND OF EXPLAINED IN LAB DOC)
   
+  
   // The OS exits if there's no runnable process.  This is a feature, not a
   // bug.  An easy solution to allowing no runnable "user" processes is to
   // have an "idle" process that's simply an infinite loop.
@@ -389,6 +390,10 @@ void ProcessSchedule () {
     AQueueRemove(&(pcb->l));
     ProcessInsertRunning(pcb);
     pcb = ProcessFindHighestPriorityPCB();
+  }
+  if(pcb == idlePCB && AQueueEmpty(&waitQueue)){
+    printf("Nothing left to run, exiting sim.\n");
+    exitsim();
   }
 
   currentPCB = pcb;
