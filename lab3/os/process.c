@@ -1171,7 +1171,7 @@ void ProcessPrintQueues(){
       l = AQueueFirst(&runQueue[i]);
       while (l != NULL){
         pcb = (PCB *)AQueueObject(l);
-        printf(" | PID: %d, prio: %d | ", GetPidFromAddress(pcb), pcb->priority);
+        printf(" | PID: %d, prio: %d, estcpu = %d | ", GetPidFromAddress(pcb), pcb->priority, pcb->estcpu);
         l = AQueueNext(l);
       }
       printf("\n");
