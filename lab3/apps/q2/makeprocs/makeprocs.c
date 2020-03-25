@@ -95,21 +95,21 @@ void main (int argc, char * argv[]){
     ditoa(mbox_S, mbox_S_str);
 
     for (i = 0; i < num_S2; i++){
-        process_create(INJECT1_TO_RUN, mbox_S2_str, s_procs_completed_str, NULL);
+        process_create(INJECT1_TO_RUN, 0, 0, mbox_S2_str, s_procs_completed_str, NULL);
     }
     //Printf("here 1\n");
     for (i = 0; i < num_CO; i++){
-        process_create(INJECT2_TO_RUN, mbox_CO_str, s_procs_completed_str, NULL);
+        process_create(INJECT2_TO_RUN, 0, 0, mbox_CO_str, s_procs_completed_str, NULL);
     }
     for (i = 0; i < numprocs_react_4CO; i++){
-        process_create(REACT1_TO_RUN, mbox_CO_str, mbox_O2_str ,s_procs_completed_str, NULL);
+        process_create(REACT1_TO_RUN, 0, 0, mbox_CO_str, mbox_O2_str ,s_procs_completed_str, NULL);
     }
     for (i = 0; i < numprocs_react_S2; i++){
-        process_create(REACT2_TO_RUN, mbox_S2_str, mbox_S_str, s_procs_completed_str, NULL);
+        process_create(REACT2_TO_RUN, 0, 0, mbox_S2_str, mbox_S_str, s_procs_completed_str, NULL);
     }
     // Printf("here 2\n");
     for (i = 0; i < numprocs_react_S_2O2; i++){
-        process_create(REACT3_TO_RUN, mbox_S_str, mbox_O2_str,s_procs_completed_str, NULL);
+        process_create(REACT3_TO_RUN, 0, 0, mbox_S_str, mbox_O2_str,s_procs_completed_str, NULL);
     }
     Printf("all processes created\n");
     
