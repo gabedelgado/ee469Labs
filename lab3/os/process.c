@@ -208,7 +208,7 @@ void ProcessIdle(){
 //----------------------------------------------------------------------
 
 void ProcessRecalcPriority(PCB* pcb){
-  pcb->priority = MIN_PRIORITY + pcb->estcpu/4 + 2*pcb->pnice;
+  pcb->priority = MIN_PRIORITY + ((int)pcb->estcpu)/4 + 2*pcb->pnice;
   if (pcb->priority > 127){
     pcb->priority = 127;
   }
