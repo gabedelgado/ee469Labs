@@ -111,7 +111,7 @@ void main (int argc, char * argv[]){
     for (i = 0; i < numprocs_react_S_2O2; i++){
         process_create(REACT3_TO_RUN, 0, 0, mbox_S_str, mbox_O2_str,s_procs_completed_str, NULL);
     }
-    Printf("all processes created\n");
+    //Printf("all processes created\n");
     
     if (sem_wait(s_procs_completed) != SYNC_SUCCESS) {
         Printf("bad sem s_procs_completed");
