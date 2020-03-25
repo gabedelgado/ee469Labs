@@ -317,6 +317,8 @@ void ProcessSchedule () {
         // recalc priority
         oldpriority = pcbtochange->priority;
         pcbtochange->estcpu = pcbtochange->estcpu * (2.0/3.0) + pcbtochange->pnice;
+        printf("calc estcpu is ");
+        printf("%f\n", pcbtochange->estcpu);
         ProcessRecalcPriority(pcbtochange);
         
         //remove link from queue only if the priority has changed after recalculation
