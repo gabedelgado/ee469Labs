@@ -271,6 +271,8 @@ void ProcessSchedule () {
   PCB * pcbtochange;
   PCB * pcbtoreturn;
   int oldpriority;
+  int autoawakethere;
+  PCB * checkautowakepcb;
   
   dbprintf ('p', "Now entering ProcessSchedule (cur=0x%x, %d ready)\n",
 	    (int)currentPCB, 0);
@@ -363,7 +365,7 @@ void ProcessSchedule () {
       while (l != NULL) {
         pcb = AQueueObject(l);
         l = AQueueNext(l);
-        if(pcb->fAutowake == 1){ProcessWakeup(pcb);}
+        if((pcb->fAutowake == 1) && (pcb->wakeuptime > ClkGetCurJiffies())){ProcessWakeup(pcb);}
       }
   }
   
@@ -391,9 +393,20 @@ void ProcessSchedule () {
     ProcessInsertRunning(pcb);
     pcb = ProcessFindHighestPriorityPCB();
   }
-  if(pcb == idlePCB && AQueueEmpty(&waitQueue)){
-    printf("Nothing left to run, exiting sim.\n");
-    exitsim();
+  autoawakethere = 0;
+  if((pcb == idlePCB) && !AQueueEmpty(&waitQueue)){
+    l = AQueueFirst(&waitQueue);
+    while(l != NULL){
+      checkautowakepcb = (PCB *)AQueueObject(l);
+      if (checkautowakepcb->fAutowake == 1){
+        autoawakethere = 1;
+      }
+      l = AQueueNext(l);
+    }
+    if(!autoawakethere){
+      printf("Nothing left to run, exiting sim.\n");
+      exitsim();
+    }
   }
 
   currentPCB = pcb;
