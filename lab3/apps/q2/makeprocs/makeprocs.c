@@ -100,7 +100,7 @@ void main (int argc, char * argv[]){
     for (i = 0; i < num_S2; i++){
         process_create("genS2.dlx.obj", mbox_S2_str, s_procs_completed_str, NULL);
     }
-    Printf("here 1\n");
+    //Printf("here 1\n");
     for (i = 0; i < num_CO; i++){
         process_create("genCO.dlx.obj", mbox_CO_str, s_procs_completed_str, NULL);
     }
@@ -110,7 +110,7 @@ void main (int argc, char * argv[]){
     for (i = 0; i < numprocs_react_S2; i++){
         process_create("reactS2.dlx.obj", mbox_S2_str, mbox_S_str, s_procs_completed_str, NULL);
     }
-    Printf("here 2\n");
+    // Printf("here 2\n");
     for (i = 0; i < numprocs_react_S_2O2; i++){
         process_create("reactS2O2.dlx.obj", mbox_S_str, mbox_O2_str,s_procs_completed_str, NULL);
     }
