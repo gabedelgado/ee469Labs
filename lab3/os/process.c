@@ -290,9 +290,11 @@ void ProcessSchedule () {
     
     currentPCB->runtime += ClkGetCurJiffies() - currentPCB->switchedtime;
     
-    if ((ClkGetCurJiffies() - currentPCB->switchedtime) > 10){ // currentPCB has been running for more than 10 jiffies (one cpu time window)
-      currentPCB->estcpu++;
-      ProcessRecalcPriority(currentPCB);
+    if (((ClkGetCurJiffies() - currentPCB->switchedtime) > 10) || (currentPCB->fYield)){ // currentPCB has been running for more than 10 jiffies (one cpu time window)
+      if (!currentPCB->fYield){
+        currentPCB->estcpu++;
+        ProcessRecalcPriority(currentPCB);
+      }
       //update currentPCB->nQuanta ?????
       if(AQueueRemove(&(currentPCB->l)) != QUEUE_SUCCESS){  // remove the currentPCB from its run queue
         printf("could not remove currently running pcb\n");
