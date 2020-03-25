@@ -117,5 +117,5 @@ void main (int argc, char * argv[]){
         Printf("bad sem s_procs_completed");
     }
 
-    Printf("gen and react processes completed");
+    Printf("gen and react processes completed\n");
 }
