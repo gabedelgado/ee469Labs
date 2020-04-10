@@ -66,6 +66,7 @@ uint32 get_argument(char *string);
 //----------------------------------------------------------------------
 void ProcessModuleInit () {
   int		i;
+  int z;
 
   dbprintf ('p', "Entering ProcessModuleInit\n");
   AQueueInit (&freepcbs);
@@ -86,6 +87,9 @@ void ProcessModuleInit () {
     //-------------------------------------------------------
     // STUDENT: Initialize the PCB's page table here.
     //-------------------------------------------------------
+    for (z = 0; z < MEM_L1TABLE_SIZE; z++){
+      pcbs[i].pagetable[z] = 0;
+    }
 
     // Finally, insert the link into the queue
     if (AQueueInsertFirst(&freepcbs, pcbs[i].l) != QUEUE_SUCCESS) {
@@ -120,7 +124,7 @@ void ProcessSetStatus (PCB *pcb, int status) {
 //----------------------------------------------------------------------
 void ProcessFreeResources (PCB *pcb) {
   int i = 0;
-
+  int z = 0;
   // Allocate a new link for this pcb on the freepcbs queue
   if ((pcb->l = AQueueAllocLink(pcb)) == NULL) {
     printf("FATAL ERROR: could not get Queue Link in ProcessFreeResources!\n");
@@ -137,7 +141,11 @@ void ProcessFreeResources (PCB *pcb) {
   //------------------------------------------------------------
   // STUDENT: Free any memory resources on process death here.
   //------------------------------------------------------------
-
+  for(z = 0; z < MEM_L1TABLE_SIZE; z++){
+    if (pcb->pagetable[z] != 0){     //check that there was an actual page table entry there
+      MemoryFreePte(pcb->pagetable[z]);
+    }
+  }
 
   ProcessSetStatus (pcb, PROCESS_STATUS_FREE);
 }
@@ -376,7 +384,8 @@ int ProcessFork (VoidFunc func, uint32 param, char *name, int isUser) {
   uint32 offset;           // Used in parsing command line argument strings, holds offset (in bytes) from 
                            // beginning of the string to the current argument.
   uint32 initial_user_params_bytes;  // total number of bytes in initial user parameters array
-
+  uint32 newpage;
+  uint32 newuserstackpage;
 
   intrs = DisableIntrs ();
   dbprintf ('I', "Old interrupt value was 0x%x.\n", intrs);
@@ -417,6 +426,15 @@ int ProcessFork (VoidFunc func, uint32 param, char *name, int isUser) {
   // for the system stack.
   //---------------------------------------------------------
 
+  //system stack
+  newpage = MemoryAllocPage();
+  pcb->sysStackArea = newpage * MEM_PAGESIZE;
+  stackframe = pcb->sysStackArea + (MEM_PAGESIZE - 1);
+  
+  //user stack
+  newuserstackpage = MemoryAllocPage();
+  // START HERE
+  
 
 
   // Now that the stack frame points at the bottom of the system stack memory area, we need to

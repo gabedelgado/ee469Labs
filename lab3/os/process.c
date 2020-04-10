@@ -307,7 +307,7 @@ void ProcessSchedule () {
   if ((ClkGetCurJiffies() - lasttimercount) > 100){
     
     //REMOVE AND RECALC PCBS IN ALL RUN QUEUES, AFTER RECALCED, PUT IN BIG LIST OF PCBs
-    ProcessPrintQueues();
+    //ProcessPrintQueues();
     for (i = 0; i < N_QUEUES; i++){
       
       linktoremove = AQueueFirst(&runQueue[i]);
@@ -321,8 +321,8 @@ void ProcessSchedule () {
         // recalc priority
         oldpriority = pcbtochange->priority;
         pcbtochange->estcpu = pcbtochange->estcpu * (2.0/3.0) + pcbtochange->pnice;
-        printf("calc estcpu is ");
-        printf("%f\n", pcbtochange->estcpu);
+        //printf("calc estcpu is ");
+        //printf("%f\n", pcbtochange->estcpu);
         ProcessRecalcPriority(pcbtochange);
         
         //remove link from queue only if the priority has changed after recalculation

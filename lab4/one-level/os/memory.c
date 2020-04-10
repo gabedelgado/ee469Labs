@@ -12,7 +12,7 @@
 #include "queue.h"
 
 // num_pages = size_of_memory / size_of_one_page
-static uint32 freemap[/*size*/];
+static uint32 freemap[MEM_MAX_PAGES / 32];
 static uint32 pagestart;
 static int nfreepages;
 static int freemapmax;
@@ -56,6 +56,16 @@ int MemoryGetSize() {
 //
 //----------------------------------------------------------------------
 void MemoryModuleInit() {
+  int i;
+  freemapmax = (MEM_MAX_PAGES / 32) - 1;
+  pagestart = (int)(lastosaddress / MEM_PAGESIZE) + 1;
+  nfreepages = (MEM_MAX_PAGES / 32) - pagestart;
+  for (i = 0; i <= freemapmax; i++){
+    freemap[i] = 0;
+  }
+  for (i = pagestart; i < MEM_MAX_PAGES; i++){
+    MemorySetFreemap(i);
+  }
 }
 
 
@@ -68,6 +78,21 @@ void MemoryModuleInit() {
 //
 //----------------------------------------------------------------------
 uint32 MemoryTranslateUserToSystem (PCB *pcb, uint32 addr) {
+  int pagenum;
+  int offset;
+  uint32 pte;
+  if (addr > MEM_MAX_VIRTUAL_ADDRESS){
+    return MEM_FAIL;
+  }
+  pagenum = addr >> MEM_L1FIELD_FIRST_BITNUM;
+  offset = addr & MEM_ADDRESS_OFFSET_MASK;
+  pte = pcb->pagetable[pagenum];
+  if ((pte & 0x1) != 1){
+    pcb->currentSavedFrame = pte;
+    MemoryPageFaultHandler(pcb);
+    return MEM_FAIL;
+  }
+  return ((pte & MEM_PTE_MASK) | offset);
 }
 
 
@@ -168,6 +193,7 @@ int MemoryCopyUserToSystem (PCB *pcb, unsigned char *from,unsigned char *to, int
 // Feel free to edit.
 //---------------------------------------------------------------------
 int MemoryPageFaultHandler(PCB *pcb) {
+  
   return MEM_FAIL;
 }
 
@@ -177,16 +203,52 @@ int MemoryPageFaultHandler(PCB *pcb) {
 // Feel free to edit/remove them
 //---------------------------------------------------------------------
 
-int MemoryAllocPage(void) {
-  return -1;
+uint32 MemoryAllocPage(void) {
+  int i;
+  int bitcheck;
+  uint32 mapcopy;
+  int bitnum = 0;
+  for (i = 0; i <= freemapmax; i++){
+    if(freemap[i] != 0){
+      bitnum = 0;
+      mapcopy = freemap[i];
+      bitcheck = mapcopy & 0x1;
+      while (bitcheck == 0){
+        mapcopy = mapcopy >> 1;
+        bitcheck = mapcopy & 0x1;
+        bitnum++;
+      }
+      freemap[i] = freemap[i] & ~(0x1 << bitnum);
+      nfreepages--;
+      return (i * 32 + bitnum);
+    }
+  }
+  return 0;
 }
 
 
 uint32 MemorySetupPte (uint32 page) {
-  return -1;
+  return (page | 0x1);
 }
 
 
 void MemoryFreePage(uint32 page) {
+  MemorySetFreemap(page);
+  nfreepages++;
+
 }
 
+void MemoryFreePte(uint32 pte){
+  int pagenum;
+  pagenum = pte >> MEM_L1FIELD_FIRST_BITNUM;
+  MemoryFreePage(pagenum);
+}
+
+void MemorySetFreemap(uint32 page){
+  int freemapindex;
+  int shiftbitnum;
+  uint32 one = 0x1;
+  freemapindex = page / 32;
+  shiftbitnum = page % 32;
+  freemap[freemapindex] = freemap[freemapindex] | (one << shiftbitnum);
+}
