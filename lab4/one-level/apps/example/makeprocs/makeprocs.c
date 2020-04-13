@@ -45,7 +45,6 @@ void main (int argc, char *argv[])
     }
   }
 
-  Printf("Starting access outside allocated pages\n");
   process_create(OUTSIDEPAGES, s_procs_completed_str, NULL);
   sem_wait(s_procs_completed);
 
