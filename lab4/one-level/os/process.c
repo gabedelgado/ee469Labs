@@ -123,7 +123,6 @@ void ProcessSetStatus (PCB *pcb, int status) {
 //
 //----------------------------------------------------------------------
 void ProcessFreeResources (PCB *pcb) {
-  int i = 0;
   int z = 0;
   // Allocate a new link for this pcb on the freepcbs queue
   if ((pcb->l = AQueueAllocLink(pcb)) == NULL) {
@@ -365,7 +364,7 @@ static void ProcessExit () {
 //
 //----------------------------------------------------------------------
 int ProcessFork (VoidFunc func, uint32 param, char *name, int isUser) {
-  int i;                   // Loop index variable
+  // int i;                   // Loop index variable
   int fd, n;               // Used for reading code from files.
   int start, codeS, codeL; // Used for reading code from files.
   int dataS, dataL;        // Used for reading code from files.
