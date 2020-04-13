@@ -14,8 +14,8 @@ void main (int argc, char *argv[])
   s_procs_completed = dstrtol(argv[1], NULL, 10);
 
   // try to access outside max v address
-  printf("overmaxaddress (%d)", getpid());
-  printf("%d", *overmaxvaddress);
+  Printf("overmaxaddress (%d)", getpid());
+  Printf("%d", *overmaxvaddress);
 
   // Signal the semaphore to tell the original process that we're done
   if(sem_signal(s_procs_completed) != SYNC_SUCCESS) {
