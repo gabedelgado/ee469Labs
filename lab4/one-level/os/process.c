@@ -429,12 +429,18 @@ int ProcessFork (VoidFunc func, uint32 param, char *name, int isUser) {
   //system stack
   newpage = MemoryAllocPage();
   pcb->sysStackArea = newpage * MEM_PAGESIZE;
-  stackframe = pcb->sysStackArea + (MEM_PAGESIZE - 1);
+  stackframe = (uint32 *)(pcb->sysStackArea + MEM_PAGESIZE - 4);
   
   //user stack
   newuserstackpage = MemoryAllocPage();
-  // START HERE
-  
+  pcb->pagetable[MEM_PAGESIZE - 1] = MemorySetupPte(newuserstackpage);
+
+  //Initialize 4 pages
+  pcb->pagetable[0] = MemorySetupPte(MemoryAllocPage());
+  pcb->pagetable[1] = MemorySetupPte(MemoryAllocPage());
+  pcb->pagetable[2] = MemorySetupPte(MemoryAllocPage());
+  pcb->pagetable[3] = MemorySetupPte(MemoryAllocPage());
+
 
 
   // Now that the stack frame points at the bottom of the system stack memory area, we need to
@@ -466,6 +472,10 @@ int ProcessFork (VoidFunc func, uint32 param, char *name, int isUser) {
   // stack frame.
   //----------------------------------------------------------------------
 
+  stackframe[PROCESS_STACK_PTBASE] = (uint32)(&pcb->pagetable[0]);
+  stackframe[PROCESS_STACK_PTBITS] = (MEM_L1FIELD_FIRST_BITNUM << 16 | MEM_L1FIELD_FIRST_BITNUM);
+  stackframe[PROCESS_STACK_PTSIZE] = MEM_L1TABLE_SIZE;
+
   if (isUser) {
     dbprintf ('p', "About to load %s\n", name);
     fd = ProcessGetCodeInfo (name, &start, &codeS, &codeL, &dataS, &dataL);
@@ -495,6 +505,7 @@ int ProcessFork (VoidFunc func, uint32 param, char *name, int isUser) {
     // of the process's virtual address space (4-byte aligned).
     //----------------------------------------------------------------------
 
+    stackframe[PROCESS_STACK_USER_STACKPOINTER] = (uint32)(MEM_MAX_VIRTUAL_ADDRESS - 3)
 
     //--------------------------------------------------------------------
     // This part is setting up the initial user stack with argc and argv.
