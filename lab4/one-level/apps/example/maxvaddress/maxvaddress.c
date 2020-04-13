@@ -14,7 +14,7 @@ void main (int argc, char *argv[])
   s_procs_completed = dstrtol(argv[1], NULL, 10);
 
   // try to access outside max v address
-  Printf("Starting access past max virtual address, will cause sim to exit\n");
+  Printf("maxvaddress(%d): Starting access past max virtual address, will cause sim to exit\n", getpid());
   Printf("%d", *overmaxvaddress);
 
   // Signal the semaphore to tell the original process that we're done

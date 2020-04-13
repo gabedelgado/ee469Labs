@@ -206,6 +206,7 @@ int MemoryPageFaultHandler(PCB *pcb) {
     ProcessKill();
   }
   else {
+    printf("allocating new page to stack for pid(%d)", GetPidFromAddress(pcb));
     newpage = MemoryAllocPage();
     pcb->pagetable[stackaddrpagenum] = MemorySetupPte(newpage);
   }

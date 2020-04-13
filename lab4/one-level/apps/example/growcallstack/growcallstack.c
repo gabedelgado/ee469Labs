@@ -4,7 +4,7 @@
 void main (int argc, char *argv[])
 {
   sem_t s_procs_completed; // Semaphore to signal the original process that we're done
-  int * overmaxvaddress = 0xFFFFFF;
+
   if (argc != 2) { 
     Printf("Usage: %s <handle_to_procs_completed_semaphore>\n"); 
     Exit();
@@ -14,14 +14,20 @@ void main (int argc, char *argv[])
   s_procs_completed = dstrtol(argv[1], NULL, 10);
 
   // Now print a message to show that everything worked
-  Printf("hello_world (%d): Hello world!\n", getpid());
-
+  Printf("growcallstack (%d): calling recursive function 1000 times", getpid());
+  recursive(0);
   // Signal the semaphore to tell the original process that we're done
   if(sem_signal(s_procs_completed) != SYNC_SUCCESS) {
     Printf("hello_world (%d): Bad semaphore s_procs_completed (%d)!\n", getpid(), s_procs_completed);
     Exit();
   }
 
-  Printf("hello_world (%d): Done!\n", getpid());
-  Printf("%d", *overmaxvaddress);
+}
+
+int recursive(int num){
+  if (num > 1000){
+    return 0;
+  }
+  recursive(num + 1);
+  return 0;
 }
