@@ -432,7 +432,7 @@ int ProcessFork (VoidFunc func, uint32 param, char *name, int isUser) {
   
   //user stack
   newuserstackpage = MemoryAllocPage();
-  pcb->pagetable[MEM_L1TABLE_SIZE - 1] = MemorySetupPte(newuserstackpage);
+  pcb->pagetable[(MEM_L1TABLE_SIZE) - 1] = MemorySetupPte(newuserstackpage);
 
   //Initialize 4 pages
   newpage = MemoryAllocPage();
