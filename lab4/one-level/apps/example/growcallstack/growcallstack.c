@@ -4,7 +4,8 @@
 void main (int argc, char *argv[])
 {
   sem_t s_procs_completed; // Semaphore to signal the original process that we're done
-
+  int bigarray[1000];
+  int i;
   if (argc != 2) { 
     Printf("Usage: %s <handle_to_procs_completed_semaphore>\n"); 
     Exit();
@@ -14,7 +15,8 @@ void main (int argc, char *argv[])
   s_procs_completed = dstrtol(argv[1], NULL, 10);
 
   // Now print a message to show that everything worked
-  Printf("growcallstack (%d): calling recursive function 1000 times", getpid());
+  for (i = 0; i < 1000; i++){bigarray[i] = 0;}
+  Printf("growcallstack (%d): forcing array of size 1000 onto stack\n", getpid());
   recursive(0);
   // Signal the semaphore to tell the original process that we're done
   if(sem_signal(s_procs_completed) != SYNC_SUCCESS) {
@@ -25,9 +27,5 @@ void main (int argc, char *argv[])
 }
 
 int recursive(int num){
-  if (num > 1000){
-    return 0;
-  }
-  recursive(num + 1);
   return 0;
 }
