@@ -3,6 +3,7 @@
 
 #define HELLO_WORLD "hello_world.dlx.obj"
 #define MAXADDRESS "maxvaddress.dlx.obj"
+#define OUTSIDEPAGES "outsidepages.dlx.obj"
 
 void main (int argc, char *argv[])
 {
@@ -44,9 +45,11 @@ void main (int argc, char *argv[])
     }
   }
 
-  
+  Printf("Starting access outside allocated pages\n");
+  process_create(OUTSIDEPAGES, s_procs_completed_str, NULL);
+  sem_wait(s_procs_completed);
 
-
+  Printf("Starting access past max virtual address, will cause sim to exit\n");
   process_create(MAXADDRESS, s_procs_completed_str, NULL);
   sem_wait(s_procs_completed);
 
