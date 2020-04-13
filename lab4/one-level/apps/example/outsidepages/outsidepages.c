@@ -15,6 +15,7 @@ void main (int argc, char *argv[])
   s_procs_completed = dstrtol(argv[1], NULL, 10);
 
   Printf("starting access to unallocated pages, pid(%d)\n", getpid());
+  toadd = *oustidepages + 0;
   // Signal the semaphore to tell the original process that we're done
   if(sem_signal(s_procs_completed) != SYNC_SUCCESS) {
     Printf("hello_world (%d): Bad semaphore s_procs_completed (%d)!\n", getpid(), s_procs_completed);
@@ -22,5 +23,5 @@ void main (int argc, char *argv[])
   }
 
   toadd = *oustidepages + 0;
-  
+
 }
