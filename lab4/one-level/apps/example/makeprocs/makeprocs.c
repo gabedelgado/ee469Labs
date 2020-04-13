@@ -48,7 +48,7 @@ void main (int argc, char *argv[])
   process_create(OUTSIDEPAGES, s_procs_completed_str, NULL);
   sem_wait(s_procs_completed);
 
-  Printf("Starting access past max virtual address, will cause sim to exit\n");
+
   process_create(MAXADDRESS, s_procs_completed_str, NULL);
   sem_wait(s_procs_completed);
 
