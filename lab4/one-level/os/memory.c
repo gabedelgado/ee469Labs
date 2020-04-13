@@ -88,8 +88,9 @@ uint32 MemoryTranslateUserToSystem (PCB *pcb, uint32 addr) {
   pagenum = addr >> MEM_L1FIELD_FIRST_BITNUM;
   offset = addr & MEM_ADDRESS_OFFSET_MASK;
   pte = pcb->pagetable[pagenum];
-  printf("translating vaddr to sys address\n");
+
   if ((pte & 0x1) != 1){
+    printf("page not valid\n");
     pcb->currentSavedFrame[PROCESS_STACK_FAULT] = addr;
     MemoryPageFaultHandler(pcb);
     return MEM_FAIL;
