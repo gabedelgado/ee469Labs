@@ -240,7 +240,7 @@ uint32 MemoryAllocPage(void) {
 
 
 uint32 MemorySetupPte (uint32 page) {
-  return (page | 0x1);
+  return ((page << MEM_L1FIELD_FIRST_BITNUM) | 0x1);
 }
 
 
