@@ -428,7 +428,7 @@ int ProcessFork (VoidFunc func, uint32 param, char *name, int isUser) {
   //system stack
   newpage = MemoryAllocPage();
   pcb->sysStackArea = newpage * MEM_PAGESIZE;
-  stackframe = (uint32 *)(pcb->sysStackArea + MEM_PAGESIZE - 8);
+  stackframe = (uint32 *)(pcb->sysStackArea + MEM_PAGESIZE - 4);
   
   //user stack
   newuserstackpage = MemoryAllocPage();

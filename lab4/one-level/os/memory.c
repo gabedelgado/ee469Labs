@@ -95,6 +95,7 @@ uint32 MemoryTranslateUserToSystem (PCB *pcb, uint32 addr) {
     MemoryPageFaultHandler(pcb);
     return MEM_FAIL;
   }
+  printf("stackaddress is %d\n", pcb->currentSavedFrame[PROCESS_STACK_USER_STACKPOINTER]);
   return ((pte & MEM_PTE_MASK) | offset);
 }
 
