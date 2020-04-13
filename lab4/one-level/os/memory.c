@@ -264,3 +264,11 @@ void MemorySetFreemap(uint32 page){
   shiftbitnum = page % 32;
   freemap[freemapindex] = freemap[freemapindex] | (one << shiftbitnum);
 }
+
+int malloc(PCB * pcb, int handle){
+  return 0;
+}
+
+int mfree(PCB * pcb, int * handle){
+  return 0;
+}
