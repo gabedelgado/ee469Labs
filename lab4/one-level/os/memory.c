@@ -201,7 +201,7 @@ int MemoryPageFaultHandler(PCB *pcb) {
   uint32 faultpagenum = faultaddress >> MEM_L1FIELD_FIRST_BITNUM;
   uint32 stackaddrpagenum = stackaddr >> MEM_L1FIELD_FIRST_BITNUM;
   uint32 newpage; 
-  printf("faultpage: %d  |||| stackpage: %d", faultpagenum, stackaddrpagenum);
+  printf("faultpage: %d  |||| stackpage: %d\n", faultpagenum, stackaddrpagenum);
   if (faultpagenum < stackaddrpagenum){
     printf("Segmentation Fault caused by PID: %d. Killing process.\n", GetPidFromAddress(pcb));
     ProcessKill();
