@@ -2,6 +2,7 @@
 #include "misc.h"
 
 #define HELLO_WORLD "hello_world.dlx.obj"
+#define MAXADDRESS "maxvaddress.dlx.obj"
 
 void main (int argc, char *argv[])
 {
@@ -42,6 +43,8 @@ void main (int argc, char *argv[])
       Exit();
     }
   }
+
+  process_create(MAXADDRESS, s_procs_completed_str, NULL);
 
   Printf("-------------------------------------------------------------------------------------\n");
   Printf("makeprocs (%d): All other processes completed, exiting main process.\n", getpid());

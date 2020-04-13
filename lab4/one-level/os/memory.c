@@ -82,7 +82,8 @@ uint32 MemoryTranslateUserToSystem (PCB *pcb, uint32 addr) {
   int offset;
   uint32 pte;
   if (addr > MEM_MAX_VIRTUAL_ADDRESS){
-    return MEM_FAIL;
+    printf("over maxaddress in %d", GetPidFromAddress(pcb));
+    ProcessKill();
   }
   pagenum = addr >> MEM_L1FIELD_FIRST_BITNUM;
   offset = addr & MEM_ADDRESS_OFFSET_MASK;
