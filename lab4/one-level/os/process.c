@@ -441,6 +441,7 @@ int ProcessFork (VoidFunc func, uint32 param, char *name, int isUser) {
   pcb->pagetable[2] = MemorySetupPte(MemoryAllocPage());
   pcb->pagetable[3] = MemorySetupPte(MemoryAllocPage());
 
+  pcb->npages = 6;
 
 
   // Now that the stack frame points at the bottom of the system stack memory area, we need to
