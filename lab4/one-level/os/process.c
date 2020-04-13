@@ -433,13 +433,17 @@ int ProcessFork (VoidFunc func, uint32 param, char *name, int isUser) {
   
   //user stack
   newuserstackpage = MemoryAllocPage();
-  pcb->pagetable[MEM_PAGESIZE - 1] = MemorySetupPte(newuserstackpage);
+  pcb->pagetable[MEM_L1TABLE_SIZE - 1] = MemorySetupPte(newuserstackpage);
 
   //Initialize 4 pages
-  pcb->pagetable[0] = MemorySetupPte(MemoryAllocPage());
-  pcb->pagetable[1] = MemorySetupPte(MemoryAllocPage());
-  pcb->pagetable[2] = MemorySetupPte(MemoryAllocPage());
-  pcb->pagetable[3] = MemorySetupPte(MemoryAllocPage());
+  newpage = MemoryAllocPage();
+  pcb->pagetable[0] = MemorySetupPte(newpage);
+  newpage = MemoryAllocPage();
+  pcb->pagetable[1] = MemorySetupPte(newpage);
+  newpage = MemoryAllocPage();
+  pcb->pagetable[2] = MemorySetupPte(newpage);
+  newpage = MemoryAllocPage();
+  pcb->pagetable[3] = MemorySetupPte(newpage);
 
   pcb->npages = 6;
 
@@ -506,7 +510,7 @@ int ProcessFork (VoidFunc func, uint32 param, char *name, int isUser) {
     // of the process's virtual address space (4-byte aligned).
     //----------------------------------------------------------------------
 
-    stackframe[PROCESS_STACK_USER_STACKPOINTER] = (uint32)(MEM_MAX_VIRTUAL_ADDRESS - 3)
+    stackframe[PROCESS_STACK_USER_STACKPOINTER] = (uint32)(MEM_MAX_VIRTUAL_ADDRESS - 3);
 
     //--------------------------------------------------------------------
     // This part is setting up the initial user stack with argc and argv.

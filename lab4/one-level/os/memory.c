@@ -88,7 +88,7 @@ uint32 MemoryTranslateUserToSystem (PCB *pcb, uint32 addr) {
   offset = addr & MEM_ADDRESS_OFFSET_MASK;
   pte = pcb->pagetable[pagenum];
   if ((pte & 0x1) != 1){
-    pcb->currentSavedFrame = pte;
+    pcb->currentSavedFrame[PROCESS_STACK_FAULT] = addr;
     MemoryPageFaultHandler(pcb);
     return MEM_FAIL;
   }
@@ -193,8 +193,20 @@ int MemoryCopyUserToSystem (PCB *pcb, unsigned char *from,unsigned char *to, int
 // Feel free to edit.
 //---------------------------------------------------------------------
 int MemoryPageFaultHandler(PCB *pcb) {
-  
-  return MEM_FAIL;
+  uint32 faultaddress = pcb->currentSavedFrame[PROCESS_STACK_FAULT];
+  uint32 stackaddr = pcb->currentSavedFrame[PROCESS_STACK_USER_STACKPOINTER];
+  uint32 faultpagenum = faultaddress >> MEM_L1FIELD_FIRST_BITNUM;
+  uint32 stackaddrpagenum = stackaddr >> MEM_L1FIELD_FIRST_BITNUM;
+  uint32 newpage; 
+  if (faultpagenum < stackaddrpagenum){
+    printf("Segmentation Fault caused by PID: %d. Killing process.\n", GetPidFromAddress(pcb));
+    ProcessKill();
+  }
+  else {
+    newpage = MemoryAllocPage();
+    pcb->pagetable[stackaddrpagenum] = MemorySetupPte(newpage);
+  }
+  return MEM_SUCCESS;
 }
 
 
