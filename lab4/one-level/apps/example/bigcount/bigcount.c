@@ -16,7 +16,7 @@ void main (int argc, char *argv[])
 
   // Now print a message to show that everything worked
   Printf("bigcount (%d): starting to count\n", getpid());
-  for (i = 0; i < 0xFFFFFF; i++);
+  for (i = 0; i < 0xFFFF; i++);
 
   // Signal the semaphore to tell the original process that we're done
 
