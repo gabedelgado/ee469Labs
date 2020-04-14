@@ -28,7 +28,7 @@ uint32 MemorySetupPte (uint32 page);
 void MemoryFreePage(uint32 page);
 void MemorySetFreemap(uint32 page);
 void MemoryFreePte(uint32 page);
-void MemoryROPAccessHandler(PCB * pcb);
+int MemoryROPAccessHandler(PCB * pcb);
 void IncreaseRefCount(uint32 page);
 // malloc
 int malloc(PCB * pcb, int handle);
