@@ -28,8 +28,7 @@ uint32 MemorySetupPte (uint32 page);
 void MemoryFreePage(uint32 page);
 void MemorySetFreemap(uint32 page);
 void MemoryFreePte(uint32 page);
-int NodeSearch(Node * node, int memsize);
-int SplitNode(Node * node, PCB * pcb, int memsize);
+
 
 // malloc
 void * malloc(PCB * pcb, int memsize);

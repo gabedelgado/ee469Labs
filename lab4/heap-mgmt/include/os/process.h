@@ -42,7 +42,6 @@ typedef struct PCB {
   uint32	pagetable[MEM_L1TABLE_SIZE]; // Statically allocated page table
   int		npages;		// Number of pages allocated to this process
   Link		*l;		// Used for keeping PCB in queues
-  Node heap_array[256];
 } PCB;
 
 extern PCB	*currentPCB;
@@ -103,15 +102,5 @@ void ProcessKill();
 // Put any functions prototypes that you define here.
 //-------------------------------------------------------
 
-typedef struct Node{
-  struct Node * parent;
-  struct Node * left;
-  struct Node * right;
-  int size;
-  int index;
-  int inUse;
-  int order;
-  int addr;
-}Node;
 
 #endif	/* __process_h__ */
