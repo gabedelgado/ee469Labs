@@ -43,7 +43,7 @@ void main (int argc, char *argv[])
   ditoa(s_procs_completed, s_procs_completed_str);
   ditoa(s_bigcount_completed, s_bigcount_completed_str);
   // Create Hello World processes
-  Printf("-------------------------------------------------------------------------------------\n");
+  Printf("--------------------START Q2 TEST 1---------------------------------------------------------\n");
   Printf("makeprocs (%d): Creating %d hello world's in a row, but only one runs at a time\n", getpid(), num_hello_world);
   for(i=0; i<num_hello_world; i++) {
     Printf("makeprocs (%d): Creating hello world #%d\n", getpid(), i);
@@ -53,14 +53,23 @@ void main (int argc, char *argv[])
       Exit();
     }
   }
-
+  Printf("-------------------------------------------------------------------------------------\n");
+  
+  
+  Printf("-------------START Q2 TEST 3 --------------------------------------------------------------------\n");
   process_create(OUTSIDEPAGES, s_procs_completed_str, NULL);
   sem_wait(s_procs_completed);
+  Printf("-------------------------------------------------------------------------------------\n");
+  
 
+  Printf("--------------------START Q2 TEST 4--------------------------------------------------------\n");
   Printf("makeprocs (%d): calling grow stack process\n", getpid());
   process_create(GROWSTACK, s_procs_completed_str, NULL);
   sem_wait(s_procs_completed);
+  Printf("-------------------------------------------------------------------------------------\n");
+  
 
+  Printf("------------------------START Q2 TEST 5---------------------------------------------------\n");
   Printf("makeprocs (%d): calling hello world process 100 times\n", getpid());
   for(i=0; i<100; i++) {
     //Printf("makeprocs (%d): Creating hello world #%d\n", getpid(), i);
@@ -70,8 +79,10 @@ void main (int argc, char *argv[])
       Exit();
     }
   }
+  Printf("-------------------------------------------------------------------------------------\n");
+  
 
-  // Printf("COULDNT FIGURE OUT HOW TO CALL 30 SIMULTANEOUS PROCESSES, KEPT GETTING FATAL ERROR FROM SEMAPHORES\n", getpid());
+  Printf("----------------------START Q2 TEST 6----------------------------------------------------\n");
   for(z=0; z < 30; z++) {
     process_create(BIGCOUNT, s_bigcount_completed_str, NULL);
     Printf("made bigcount #%d\n", z);
@@ -81,10 +92,12 @@ void main (int argc, char *argv[])
     Printf("Bad semaphore s_procs_completed (%d) in %s\n", s_procs_completed, argv[0]);
     Exit();
   }
-
+  Printf("-------------------------------------------------------------------------------------\n");
+  
+  
+  Printf("---------------------------START Q2 TEST 2, WILL KILL SIMULATION----------------------------------------------\n");
   process_create(MAXADDRESS, s_procs_completed_str, NULL);
   sem_wait(s_procs_completed);
-
   Printf("-------------------------------------------------------------------------------------\n");
   Printf("makeprocs (%d): All other processes completed, exiting main process.\n", getpid());
 
