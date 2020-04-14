@@ -693,13 +693,13 @@ int ProcessRealFork(){
   }
 
   // printing child and currentpcb page tables
-  printf("in fork call, PARENT page table: \n");
+  printf("in fork call, PARENT (%d)page table: \n", GetPidFromAddress(currentPCB));
   for (i = 0; i < MEM_L1TABLE_SIZE; i++){
     if ((currentPCB->pagetable[i] & MEM_PTE_VALID) == 1){
       printf("page %d: %d\n", i, currentPCB->pagetable[i]);
     }
   }
-  printf("in fork call, CHILD page table: \n");
+  printf("in fork call, CHILD (%d) page table: \n", GetPidFromAddress(child));
   for (i = 0; i < MEM_L1TABLE_SIZE; i++){
     if ((child->pagetable[i] & MEM_PTE_VALID) == 1){
       printf("page %d: %d\n", i, child->pagetable[i]);
