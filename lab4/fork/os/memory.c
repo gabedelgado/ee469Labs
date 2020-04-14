@@ -291,7 +291,7 @@ void MemorySetFreemap(uint32 page){
 }
 
 int MemoryROPAccessHandler(PCB * pcb){
-
+  int i;
   uint32 fault_address = pcb->currentSavedFrame[PROCESS_STACK_FAULT];
   int l1_page_num = fault_address >> MEM_L1FIELD_FIRST_BITNUM;
   int phys_page_num = (MemoryTranslateUserToSystem(pcb, pcb->currentSavedFrame[PROCESS_STACK_FAULT])) >> MEM_L1FIELD_FIRST_BITNUM;
@@ -315,6 +315,12 @@ int MemoryROPAccessHandler(PCB * pcb){
     //setup pte for new page
     //decrease ref_count
     page_refcounters[phys_page_num] -= 1;
+  }
+  printf("in ROP handler call, printing page table");
+  for (i = 0; i < MEM_L1TABLE_SIZE; i++){
+    if ((pcb->pagetable[i] & MEM_PTE_VALID) == 1){
+      printf("page %d: %d", i, pcb->pagetable[i]);
+    }
   }
   return MEM_SUCCESS;
 }
