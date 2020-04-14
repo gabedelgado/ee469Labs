@@ -296,7 +296,7 @@ int MemoryROPAccessHandler(PCB * pcb){
   int l1_page_num = fault_address >> MEM_L1FIELD_FIRST_BITNUM;
   int phys_page_num = (MemoryTranslateUserToSystem(pcb, pcb->currentSavedFrame[PROCESS_STACK_FAULT])) >> MEM_L1FIELD_FIRST_BITNUM;
   int pageGen;
-  printf("handler gets called");
+  printf("handler gets called\n");
   if (page_refcounters[phys_page_num] < 1){
     //Kill Process and return mem_fail
     ProcessKill();
@@ -307,7 +307,7 @@ int MemoryROPAccessHandler(PCB * pcb){
   }
   else{
     //generate new page
-    printf("generating new page for (%d)", GetPidFromAddress(pcb));
+    printf("generating new page for (%d)\n", GetPidFromAddress(pcb));
     pageGen = MemoryAllocPage();
     pcb->pagetable[l1_page_num] = MemorySetupPte(pageGen);
     //bcopy
