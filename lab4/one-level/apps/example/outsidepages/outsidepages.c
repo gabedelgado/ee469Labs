@@ -5,7 +5,6 @@ void main (int argc, char *argv[])
 {
   sem_t s_procs_completed; // Semaphore to signal the original process that we're done
   int * oustidepages = 0x41000;
-  int toadd; 
   if (argc != 2) { 
     Printf("Usage: %s <handle_to_procs_completed_semaphore>\n"); 
     Exit();

@@ -71,19 +71,19 @@ void main (int argc, char *argv[])
     }
   }
 
-  Printf("makeprocs (%d): calling bigcount process 30 times\n", getpid());
-  for(z=0; z < 30; z++) {
-    process_create(BIGCOUNT, s_bigcount_completed_str, NULL);
-    Printf("made bigcount #%d\n", z);
-    sem_wait(s_bigcount_completed);
-  }
+  Printf("COULDNT FIGURE OUT HOW TO CALL 30 SIMULTANEOUS PROCESSES, KEPT GETTING FATAL ERROR FROM SEMAPHORES\n", getpid());
+  // for(z=0; z < 30; z++) {
+  //   process_create(BIGCOUNT, s_bigcount_completed_str, NULL);
+  //   Printf("made bigcount #%d\n", z);
+  //   sem_wait(s_bigcount_completed);
+  // }
   // if (sem_wait(s_bigcount_completed) != SYNC_SUCCESS) {
   //   Printf("Bad semaphore s_procs_completed (%d) in %s\n", s_procs_completed, argv[0]);
   //   Exit();
   // }
 
-  // process_create(MAXADDRESS, s_procs_completed_str, NULL);
-  // sem_wait(s_procs_completed);
+  process_create(MAXADDRESS, s_procs_completed_str, NULL);
+  sem_wait(s_procs_completed);
 
   Printf("-------------------------------------------------------------------------------------\n");
   Printf("makeprocs (%d): All other processes completed, exiting main process.\n", getpid());
