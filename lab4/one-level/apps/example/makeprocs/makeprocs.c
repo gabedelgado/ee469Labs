@@ -11,6 +11,7 @@ void main (int argc, char *argv[])
 {
   int num_hello_world = 0;             // Used to store number of processes to create
   int i;                               // Loop index variable
+  int z;
   sem_t s_procs_completed;             // Semaphore used to wait until all spawned processes have completed
   char s_procs_completed_str[10];      // Used as command-line argument to pass page_mapped handle to new processes
   sem_t s_bigcount_completed;
@@ -68,7 +69,7 @@ void main (int argc, char *argv[])
   }
 
   Printf("makeprocs (%d): calling bigcount process 30 times\n", getpid());
-  for(i=0; i < 30; i++) {
+  for(z=0; z < 30; z++) {
     process_create(BIGCOUNT, s_bigcount_completed_str, NULL);
   }
   sem_wait(s_bigcount_completed);
