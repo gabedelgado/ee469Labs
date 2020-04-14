@@ -236,7 +236,7 @@ uint32 MemoryAllocPage(void) {
         bitcheck = mapcopy & 0x1;
         bitnum++;
       }
-      freemap[i] = freemap[i] & ~(0x1 << bitnum);
+      freemap[i] = freemap[i] & invert(0x1 << bitnum);
       nfreepages--;
       return (i * 32 + bitnum);
     }
