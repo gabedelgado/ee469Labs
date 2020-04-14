@@ -268,9 +268,9 @@ _mfree:
 .endproc _mfree
 
 
-.proc _process_fork
-.global _process_fork
-_process_fork:
+.proc _fork
+.global _fork
+_fork:
         trap    #0x430
         jr      r31
-.endproc _process_fork
+.endproc _fork
