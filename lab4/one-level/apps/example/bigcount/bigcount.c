@@ -19,10 +19,11 @@ void main (int argc, char *argv[])
   for (i = 0; i < 0xFFFFFFFF; i++){}
 
   // Signal the semaphore to tell the original process that we're done
+
+  Printf("bigcount (%d): Done counting!\n", getpid());
+
   if(sem_signal(s_procs_completed) != SYNC_SUCCESS) {
     Printf("hello_world (%d): Bad semaphore s_procs_completed (%d)!\n", getpid(), s_procs_completed);
     Exit();
   }
-
-  Printf("bigcount (%d): Done counting!\n", getpid());
 }
