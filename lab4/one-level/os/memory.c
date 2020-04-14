@@ -202,13 +202,13 @@ int MemoryPageFaultHandler(PCB *pcb) {
   uint32 faultpagenum = faultaddress >> MEM_L1FIELD_FIRST_BITNUM;
   uint32 stackaddrpagenum = stackaddr >> MEM_L1FIELD_FIRST_BITNUM;
   uint32 newpage; 
-  printf("faultpage: %d  |||| stackpage: %d\n", faultpagenum, stackaddrpagenum);
+  // printf("faultpage: %d  |||| stackpage: %d\n", faultpagenum, stackaddrpagenum);
   if (faultpagenum < stackaddrpagenum){
     printf("Segmentation Fault caused by PID: %d. Killing process.\n", GetPidFromAddress(pcb));
     ProcessKill();
   }
   else {
-    printf("allocating new page to stack for pid(%d)", GetPidFromAddress(pcb));
+    printf("Allocating new page to stack for pid(%d)", GetPidFromAddress(pcb));
     newpage = MemoryAllocPage();
     pcb->pagetable[stackaddrpagenum] = MemorySetupPte(newpage);
   }
