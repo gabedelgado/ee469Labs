@@ -123,7 +123,6 @@ void ProcessSetStatus (PCB *pcb, int status) {
 //
 //----------------------------------------------------------------------
 void ProcessFreeResources (PCB *pcb) {
-  int i = 0;
   int z = 0;
   // Allocate a new link for this pcb on the freepcbs queue
   if ((pcb->l = AQueueAllocLink(pcb)) == NULL) {
@@ -365,7 +364,7 @@ static void ProcessExit () {
 //
 //----------------------------------------------------------------------
 int ProcessFork (VoidFunc func, uint32 param, char *name, int isUser) {
-  int i;                   // Loop index variable
+  // int i;                   // Loop index variable
   int fd, n;               // Used for reading code from files.
   int start, codeS, codeL; // Used for reading code from files.
   int dataS, dataL;        // Used for reading code from files.
@@ -433,13 +432,17 @@ int ProcessFork (VoidFunc func, uint32 param, char *name, int isUser) {
   
   //user stack
   newuserstackpage = MemoryAllocPage();
-  pcb->pagetable[MEM_PAGESIZE - 1] = MemorySetupPte(newuserstackpage);
+  pcb->pagetable[(MEM_L1TABLE_SIZE) - 1] = MemorySetupPte(newuserstackpage);
 
   //Initialize 4 pages
-  pcb->pagetable[0] = MemorySetupPte(MemoryAllocPage());
-  pcb->pagetable[1] = MemorySetupPte(MemoryAllocPage());
-  pcb->pagetable[2] = MemorySetupPte(MemoryAllocPage());
-  pcb->pagetable[3] = MemorySetupPte(MemoryAllocPage());
+  newpage = MemoryAllocPage();
+  pcb->pagetable[0] = MemorySetupPte(newpage);
+  newpage = MemoryAllocPage();
+  pcb->pagetable[1] = MemorySetupPte(newpage);
+  newpage = MemoryAllocPage();
+  pcb->pagetable[2] = MemorySetupPte(newpage);
+  newpage = MemoryAllocPage();
+  pcb->pagetable[3] = MemorySetupPte(newpage);
 
   pcb->npages = 6;
 
@@ -506,7 +509,7 @@ int ProcessFork (VoidFunc func, uint32 param, char *name, int isUser) {
     // of the process's virtual address space (4-byte aligned).
     //----------------------------------------------------------------------
 
-    stackframe[PROCESS_STACK_USER_STACKPOINTER] = (uint32)(MEM_MAX_VIRTUAL_ADDRESS - 3)
+    stackframe[PROCESS_STACK_USER_STACKPOINTER] = (uint32)(MEM_MAX_VIRTUAL_ADDRESS - 3);
 
     //--------------------------------------------------------------------
     // This part is setting up the initial user stack with argc and argv.
@@ -676,7 +679,7 @@ int ProcessRealFork(){
   //Set return value of fork to the PID of the child process for the parent
   ProcessSetResult(currentPCB,GetPidFromAddress(child));
   //Set return value of fork to 0 for the child;
-  ProcessSetResult(child,0)
+  ProcessSetResult(child,0);
   
   //Put child PCB onto end of run queue
   ProcessSetStatus(child,PROCESS_STATUS_RUNNABLE);

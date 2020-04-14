@@ -64,7 +64,7 @@ void MemoryModuleInit() {
   for (i = 0; i <= freemapmax; i++){
     freemap[i] = 0;
   }
-  //Q3: set os pages to 1
+    //Q3: set os pages to 1
   for (i = 0;i < pagestart; i++){
     page_refcounters[i] = 1;
   }
@@ -88,16 +88,20 @@ uint32 MemoryTranslateUserToSystem (PCB *pcb, uint32 addr) {
   int offset;
   uint32 pte;
   if (addr > MEM_MAX_VIRTUAL_ADDRESS){
-    return MEM_FAIL;
+    // printf("over maxaddress in %d", GetPidFromAddress(pcb));
+    ProcessKill();
   }
   pagenum = addr >> MEM_L1FIELD_FIRST_BITNUM;
   offset = addr & MEM_ADDRESS_OFFSET_MASK;
   pte = pcb->pagetable[pagenum];
+  //printf("translating %d, pagenum: %d\n", addr, pagenum);
   if ((pte & 0x1) != 1){
-    pcb->currentSavedFrame = pte;
+    //printf("page not valid\n");
+    pcb->currentSavedFrame[PROCESS_STACK_FAULT] = addr;
     MemoryPageFaultHandler(pcb);
     return MEM_FAIL;
   }
+  // printf("stackaddress is %d\n", pcb->currentSavedFrame[PROCESS_STACK_USER_STACKPOINTER]);
   return ((pte & MEM_PTE_MASK) | offset);
 }
 
@@ -199,8 +203,22 @@ int MemoryCopyUserToSystem (PCB *pcb, unsigned char *from,unsigned char *to, int
 // Feel free to edit.
 //---------------------------------------------------------------------
 int MemoryPageFaultHandler(PCB *pcb) {
-  
-  return MEM_FAIL;
+  uint32 faultaddress = pcb->currentSavedFrame[PROCESS_STACK_FAULT];
+  uint32 stackaddr = pcb->currentSavedFrame[PROCESS_STACK_USER_STACKPOINTER];
+  uint32 faultpagenum = faultaddress >> MEM_L1FIELD_FIRST_BITNUM;
+  uint32 stackaddrpagenum = stackaddr >> MEM_L1FIELD_FIRST_BITNUM;
+  uint32 newpage; 
+  // printf("faultpage: %d  |||| stackpage: %d\n", faultpagenum, stackaddrpagenum);
+  if (faultpagenum < stackaddrpagenum){
+    printf("Segmentation Fault caused by PID: %d. Killing process.\n", GetPidFromAddress(pcb));
+    ProcessKill();
+  }
+  else {
+    printf("Allocating new page to stack for pid(%d)\n", GetPidFromAddress(pcb));
+    newpage = MemoryAllocPage();
+    pcb->pagetable[stackaddrpagenum] = MemorySetupPte(newpage);
+  }
+  return MEM_SUCCESS;
 }
 
 
@@ -224,7 +242,7 @@ uint32 MemoryAllocPage(void) {
         bitcheck = mapcopy & 0x1;
         bitnum++;
       }
-      freemap[i] = freemap[i] & ~(0x1 << bitnum);
+      freemap[i] = freemap[i] & invert(0x1 << bitnum);
       nfreepages--;
       //Q3 set page associated with available bit in freemap
       page_refcounters[i * 32 + bitnum] = 1;
@@ -237,12 +255,11 @@ uint32 MemoryAllocPage(void) {
 
 
 uint32 MemorySetupPte (uint32 page) {
-  return (page | 0x1);
+  return ((page << MEM_L1FIELD_FIRST_BITNUM) | 0x1);
 }
 
 
 void MemoryFreePage(uint32 page) {
-  
   MemorySetFreemap(page);
   nfreepages++;
 
@@ -257,7 +274,7 @@ void MemoryFreePte(uint32 pte){
     return MEM_FAIL;
   }
   else if (page_refcounters[pagenum] > 1){
-    page_refcounters[page] -= 1;
+    page_refcounters[pagenum] -= 1; // IS THIS RIGHT ?????
   }
   else if (page_refcounters[pagenum] == 0){
     MemoryFreePage(pagenum);
@@ -304,4 +321,11 @@ void IncreaseRefCount(uint32 page){
   uint32 pageNum;
   pageNum = page >> MEM_L1FIELD_FIRST_BITNUM;
   page_refcounters[pageNum] += 1;
+}
+
+int malloc(PCB * pcb, int handle){
+  return 0;
+}
+int mfree(PCB * pcb, int * handle){
+  return 0;
 }

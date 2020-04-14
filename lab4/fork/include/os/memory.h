@@ -30,7 +30,8 @@ void MemorySetFreemap(uint32 page);
 void MemoryFreePte(uint32 page);
 void MemoryROPAccessHandler(PCB * pcb);
 void IncreaseRefCount(uint32 page);
-
 // malloc
+int malloc(PCB * pcb, int handle);
+int mfree(PCB * pcb, int * handle);
 // mfree
 #endif	// _memory_h_
