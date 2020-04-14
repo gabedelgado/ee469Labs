@@ -270,7 +270,7 @@ void MemoryFreePte(uint32 pte){
 
   if (page_refcounters[pagenum] < 1){
     ProcessKill();
-    return MEM_FAIL;
+    // return MEM_FAIL;
   }
   else if (page_refcounters[pagenum] > 1){
     page_refcounters[pagenum] -= 1; 

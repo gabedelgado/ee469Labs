@@ -625,7 +625,6 @@ int ProcessFork (VoidFunc func, uint32 param, char *name, int isUser) {
 
 int ProcessRealFork(){
   int i;
-  uint32 * stackframe;
   PCB * child;
   int interrupts;
   uint32 currentPage;
