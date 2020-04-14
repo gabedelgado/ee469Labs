@@ -5,6 +5,7 @@
 #define MAXADDRESS "maxvaddress.dlx.obj"
 #define OUTSIDEPAGES "outsidepages.dlx.obj"
 #define GROWSTACK "growcallstack.dlx.obj"
+#define BIGCOUNT "bigcount.dlx.obj"
 
 void main (int argc, char *argv[])
 {
@@ -12,6 +13,8 @@ void main (int argc, char *argv[])
   int i;                               // Loop index variable
   sem_t s_procs_completed;             // Semaphore used to wait until all spawned processes have completed
   char s_procs_completed_str[10];      // Used as command-line argument to pass page_mapped handle to new processes
+  sem_t s_bigcount_completed;
+  char s_bigcount_completed_str[10];
 
   if (argc != 2) {
     Printf("Usage: %s <number of hello world processes to create>\n", argv[0]);
@@ -29,11 +32,12 @@ void main (int argc, char *argv[])
     Exit();
   }
 
+  s_bigcount_completed = sem_create(-29);
   // Setup the command-line arguments for the new processes.  We're going to
   // pass the handles to the semaphore as strings
   // on the command line, so we must first convert them from ints to strings.
   ditoa(s_procs_completed, s_procs_completed_str);
-
+  ditoa(s_bigcount_completed, s_bigcount_completed_str);
   // Create Hello World processes
   Printf("-------------------------------------------------------------------------------------\n");
   Printf("makeprocs (%d): Creating %d hello world's in a row, but only one runs at a time\n", getpid(), num_hello_world);
@@ -62,6 +66,12 @@ void main (int argc, char *argv[])
       Exit();
     }
   }
+
+  Printf("makeprocs (%d): calling bigcount process 30 times\n", getpid());
+  for(i=0; i < 30; i++) {
+    process_create(BIGCOUNT, s_bigcount_completed_str, NULL);
+  }
+  sem_wait(s_bigcount_completed);
 
   process_create(MAXADDRESS, s_procs_completed_str, NULL);
   sem_wait(s_procs_completed);

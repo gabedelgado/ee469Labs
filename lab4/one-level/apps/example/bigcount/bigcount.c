@@ -4,7 +4,8 @@
 void main (int argc, char *argv[])
 {
   sem_t s_procs_completed; // Semaphore to signal the original process that we're done
-  int * overmaxvaddress = 0xFFFFFF;
+  int i;
+  
   if (argc != 2) { 
     Printf("Usage: %s <handle_to_procs_completed_semaphore>\n"); 
     Exit();
@@ -14,7 +15,8 @@ void main (int argc, char *argv[])
   s_procs_completed = dstrtol(argv[1], NULL, 10);
 
   // Now print a message to show that everything worked
-  Printf("hello_world (%d): Hello world!\n", getpid());
+  Printf("bigcount (%d): starting to count\n", getpid());
+  for (i = 0; i < 0xFFFFFFFF; i++){}
 
   // Signal the semaphore to tell the original process that we're done
   if(sem_signal(s_procs_completed) != SYNC_SUCCESS) {
@@ -22,6 +24,5 @@ void main (int argc, char *argv[])
     Exit();
   }
 
-  Printf("hello_world (%d): Done!\n", getpid());
-  Printf("%d", *overmaxvaddress);
+  Printf("bigcount (%d): Done counting!\n", getpid());
 }
