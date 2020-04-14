@@ -16,8 +16,8 @@ void main (int argc, char *argv[])
 
   // Now print a message to show that everything worked
   for (i = 0; i < 1000; i++){bigarray[i] = 0;}
-  Printf("growcallstack (%d): forcing array of size 1000 onto stack\n", getpid());
-  recursive(0);
+  
+  func(0);
   // Signal the semaphore to tell the original process that we're done
   if(sem_signal(s_procs_completed) != SYNC_SUCCESS) {
     Printf("hello_world (%d): Bad semaphore s_procs_completed (%d)!\n", getpid(), s_procs_completed);
@@ -26,6 +26,6 @@ void main (int argc, char *argv[])
 
 }
 
-int recursive(int num){
+int func(int num){
   return 0;
 }

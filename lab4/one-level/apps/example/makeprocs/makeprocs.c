@@ -49,6 +49,7 @@ void main (int argc, char *argv[])
   process_create(OUTSIDEPAGES, s_procs_completed_str, NULL);
   sem_wait(s_procs_completed);
 
+  Printf("makeprocs (%d): calling grow stack process\n", getpid());
   process_create(GROWSTACK, s_procs_completed_str, NULL);
   sem_wait(s_procs_completed);
 
