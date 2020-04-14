@@ -316,10 +316,10 @@ int MemoryROPAccessHandler(PCB * pcb){
     //decrease ref_count
     page_refcounters[phys_page_num] -= 1;
   }
-  printf("in ROP handler call, printing page table");
+  printf("in ROP handler call, printing page table\n");
   for (i = 0; i < MEM_L1TABLE_SIZE; i++){
     if ((pcb->pagetable[i] & MEM_PTE_VALID) == 1){
-      printf("page %d: %d", i, pcb->pagetable[i]);
+      printf("page %d: %d\n", i, pcb->pagetable[i]);
     }
   }
   return MEM_SUCCESS;

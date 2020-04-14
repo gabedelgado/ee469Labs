@@ -696,13 +696,13 @@ int ProcessRealFork(){
   printf("parent page table: \n");
   for (i = 0; i < MEM_L1TABLE_SIZE; i++){
     if ((currentPCB->pagetable[i] & MEM_PTE_VALID) == 1){
-      printf("page %d: %d", i, currentPCB->pagetable[i]);
+      printf("page %d: %d\n", i, currentPCB->pagetable[i]);
     }
   }
   printf("parent page table: \n");
   for (i = 0; i < MEM_L1TABLE_SIZE; i++){
     if ((child->pagetable[i] & MEM_PTE_VALID) == 1){
-      printf("page %d: %d", i, child->pagetable[i]);
+      printf("page %d: %d\n", i, child->pagetable[i]);
     }
   }
   return (child - pcbs);
