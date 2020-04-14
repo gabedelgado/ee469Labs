@@ -33,7 +33,7 @@ void main (int argc, char *argv[])
     Exit();
   }
 
-  if ((s_bigcount_completed = sem_create(-10)) == SYNC_FAIL) {
+  if ((s_bigcount_completed = sem_create(0)) == SYNC_FAIL) {
     Printf("makeprocs (%d): Bad sem_create\n", getpid());
     Exit();
   }
