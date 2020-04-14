@@ -662,20 +662,22 @@ int ProcessRealFork(){
   bcopy((char *)currentPCB, (char*)child, sizeof(PCB));
 
   //give the new process its own copy of the system stack
-  child->sysStackArea = MemoryAllocPage();
+  child->sysStackArea = MemoryAllocPage() * MEM_PAGESIZE;
   //Copy currentPCB sysStack into child
   bcopy((char*)currentPCB->sysStackArea,(char*)child->sysStackArea,MEM_PAGESIZE);
 
   //Fix sysStacks pointer and currentSavedFrame to the new stack area
-  child->sysStackPtr = (uint32 *)(child->sysStackArea | (uint32)currentPCB->sysStackPtr & MEM_ADDRESS_OFFSET_MASK);
-  child->currentSavedFrame = (uint32 *)(child->sysStackArea | (uint32)currentPCB->currentSavedFrame & MEM_ADDRESS_OFFSET_MASK);
+  child->sysStackPtr = (uint32 *)(child->sysStackArea | ((uint32)currentPCB->sysStackPtr & MEM_ADDRESS_OFFSET_MASK));
+  child->currentSavedFrame = (uint32 *)(child->sysStackArea | ((uint32)currentPCB->currentSavedFrame & MEM_ADDRESS_OFFSET_MASK));
 
   //Fix page table base pointer in the current frame for the childpcb
-  child->currentSavedFrame[PROCESS_STACK_PTBASE] = (uint32) &child->pagetable[0];
+  child->currentSavedFrame[PROCESS_STACK_PTBASE] = (uint32)(&child->pagetable[0]);
 
   //Fix the previous saved frame pointer if there was a previous save frame
   //Incomplete
-  // TODO !!!!!!!
+  if (currentPCB->currentSavedFrame[PROCESS_STACK_PREV_FRAME] != 0){
+    child->currentSavedFrame[PROCESS_STACK_PREV_FRAME] = child->sysStackArea | ((uint32)currentPCB->currentSavedFrame[PROCESS_STACK_PREV_FRAME] & MEM_ADDRESS_OFFSET_MASK);
+  }
 
   //Set return value of fork to the PID of the child process for the parent
   ProcessSetResult(currentPCB,GetPidFromAddress(child));
