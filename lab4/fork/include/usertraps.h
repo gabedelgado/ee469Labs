@@ -68,7 +68,7 @@ void *malloc(int memsize);              //trap 0x467
 int mfree(void *ptr);                   //trap 0x468
 
 // realfork
-int fork();                             //trap 0x430
+int process_fork();                             //trap 0x430
 
 
 #ifndef NULL
