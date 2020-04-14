@@ -9,7 +9,7 @@ void main (int argc, char *argv[])
     Printf("Usage: %s <handle_to_procs_completed_semaphore>\n"); 
     Exit();
   } 
-
+  fork();
   // Convert the command-line strings into integers for use as handles
   s_procs_completed = dstrtol(argv[1], NULL, 10);
 
