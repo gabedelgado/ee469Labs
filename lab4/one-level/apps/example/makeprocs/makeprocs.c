@@ -72,7 +72,7 @@ void main (int argc, char *argv[])
   for(z=0; z < 30; z++) {
     process_create(BIGCOUNT, s_bigcount_completed_str, NULL);
   }
-  //sem_wait(s_bigcount_completed);
+  sem_wait(s_bigcount_completed);
 
   process_create(MAXADDRESS, s_procs_completed_str, NULL);
   sem_wait(s_procs_completed);
