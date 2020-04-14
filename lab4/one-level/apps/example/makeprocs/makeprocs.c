@@ -81,8 +81,8 @@ void main (int argc, char *argv[])
     Exit();
   }
 
-  process_create(MAXADDRESS, s_procs_completed_str, NULL);
-  sem_wait(s_procs_completed);
+  // process_create(MAXADDRESS, s_procs_completed_str, NULL);
+  // sem_wait(s_procs_completed);
 
   Printf("-------------------------------------------------------------------------------------\n");
   Printf("makeprocs (%d): All other processes completed, exiting main process.\n", getpid());
