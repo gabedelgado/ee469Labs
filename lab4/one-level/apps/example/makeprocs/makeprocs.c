@@ -53,6 +53,16 @@ void main (int argc, char *argv[])
   process_create(GROWSTACK, s_procs_completed_str, NULL);
   sem_wait(s_procs_completed);
 
+  Printf("makeprocs (%d): calling hello world process 100 times\n", getpid());
+  for(i=0; i<100; i++) {
+    //Printf("makeprocs (%d): Creating hello world #%d\n", getpid(), i);
+    process_create(HELLO_WORLD, s_procs_completed_str, NULL);
+    if (sem_wait(s_procs_completed) != SYNC_SUCCESS) {
+      Printf("Bad semaphore s_procs_completed (%d) in %s\n", s_procs_completed, argv[0]);
+      Exit();
+    }
+  }
+
   process_create(MAXADDRESS, s_procs_completed_str, NULL);
   sem_wait(s_procs_completed);
 
