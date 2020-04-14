@@ -675,6 +675,7 @@ int ProcessRealFork(){
 
   //Fix the previous saved frame pointer if there was a previous save frame
   //Incomplete
+  // TODO !!!!!!!
 
   //Set return value of fork to the PID of the child process for the parent
   ProcessSetResult(currentPCB,GetPidFromAddress(child));
@@ -690,7 +691,7 @@ int ProcessRealFork(){
     exitsim();
   }
 
-  return (pcb - pcbs);
+  return (child - pcbs);
 }
 
 //----------------------------------------------------------------------

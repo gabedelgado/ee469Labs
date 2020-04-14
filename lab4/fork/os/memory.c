@@ -262,7 +262,6 @@ uint32 MemorySetupPte (uint32 page) {
 void MemoryFreePage(uint32 page) {
   MemorySetFreemap(page);
   nfreepages++;
-
 }
 
 void MemoryFreePte(uint32 pte){
@@ -270,13 +269,14 @@ void MemoryFreePte(uint32 pte){
   pagenum = pte >> MEM_L1FIELD_FIRST_BITNUM;
 
   if (page_refcounters[pagenum] < 1){
-    //Kill Process Missing
+    ProcessKill();
     return MEM_FAIL;
   }
   else if (page_refcounters[pagenum] > 1){
-    page_refcounters[pagenum] -= 1; // IS THIS RIGHT ?????
+    page_refcounters[pagenum] -= 1; 
   }
-  else if (page_refcounters[pagenum] == 0){
+  
+  if (page_refcounters[pagenum] == 0){
     MemoryFreePage(pagenum);
   }
 }
@@ -294,11 +294,12 @@ int MemoryROPAccessHandler(PCB * pcb){
 
   uint32 fault_address = pcb->currentSavedFrame[PROCESS_STACK_FAULT];
   int l1_page_num = fault_address >> MEM_L1FIELD_FIRST_BITNUM;
-  int phys_page_num = l1_page_num >> MEM_L1FIELD_FIRST_BITNUM;
+  int phys_page_num = (MemoryTranslateUserToSystem(pcb, pcb->currentSavedFrame[PROCESS_STACK_FAULT])) >> MEM_L1FIELD_FIRST_BITNUM;
   int pageGen;
 
   if (page_refcounters[phys_page_num] < 1){
     //Kill Process and return mem_fail
+    ProcessKill();
     return MEM_FAIL;
   }
   else if (page_refcounters[phys_page_num] == 1){
